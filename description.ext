@@ -1,0 +1,6 @@
+//respawn = "BASE";
+disabledAI = 1;
+
+#include "defines.hpp"
+#include "dialogs.hpp"
+#include "CfgSounds.hpp"
