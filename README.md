@@ -12,6 +12,12 @@
 
 The arma engine's SQF language is very old and quirky, so that is why some of the code might look inefficient or unnecessary (For example, the SQF language does not feature implicit short circuit evaluation).
 
+## Usage
+
+To use this game-mode you will have to place the cti-airborne folder into *Documents/Arma 3 - Other Profiles/[Username]/MPMissions*. However, I would recommend waiting until I finish the project and submit it to the steam workshop.
+
+If you just want to take a look at the code feel free to look at initPlayerLocal.sqf, initServer.sqf, and all of the functions in the Server and Client folders.
+
 ## Why
 
 Arma 3 is one of my favorite games and flying aircraft is one of my favorite parts of the game, but I feel like there aren't any solid aircraft-centric game-modes.
