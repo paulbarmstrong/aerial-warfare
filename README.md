@@ -4,7 +4,7 @@
 
 * Author: Paul Armstrong
 * Date: November 2017 (As of February 2018 I am still working on this project)
-* Progress: ~50%
+* Progress: ~60%
 
 ## Description
 
