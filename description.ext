@@ -1,5 +1,4 @@
-//respawn = "BASE";
-disabledAI = 1;
+disabledAI = 0;
 
 #include "defines.hpp"
 #include "dialogs.hpp"

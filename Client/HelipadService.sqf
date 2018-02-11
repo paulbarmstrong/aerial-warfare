@@ -1,17 +1,10 @@
 disableSerialization;
 
-_helipad = bluforHelipad;
-_jetSpot = bluforJetSpot;
-if (side player == east) then {
-	_helipad = opforHelipad;
-	_jetSpot = opforJetSpot;
-};
-
 _countdown = 5;
 
 sleep 1;
 
-while {(((vehicle player) distance2D _helipad) < 10 || ((vehicle player) distance2D _jetSpot) < 15) && isTouchingGround (vehicle player) && _countdown > 0} do {
+while {isTouchingGround (vehicle player) && vectorMagnitude velocity vehicle player < 5 && _countdown > 0} do {
 
 _string = format["<t color='#f4c542'>Servicing aircraft in %1 seconds.</t>",_countdown];
 
@@ -22,7 +15,7 @@ _countdown = _countdown - 1;
 sleep 1;
 };
 
-if ((((vehicle player) distance2D _helipad) < 10 || ((vehicle player) distance2D _jetSpot) < 15) && isTouchingGround (vehicle player)) then {
+if (isTouchingGround (vehicle player) && vectorMagnitude velocity vehicle player < 5 && alive player) then {
 	uiNamespace setVariable ["repairState",2];
 	[] spawn FNC_Sortie;
 } else {

@@ -1,11 +1,11 @@
 disableSerialization;
 
-_helipad = bluforHelipad;
+_helipads = BluforHelipads;
 _heliNames = BLUFOR_HELI_NAMES;
 _heliPrices = BLUFOR_HELI_PRICES;
 
 if (side player == east) then {
-	_helipad = opforHelipad;
+	_helipads = OpforHelipads;
 	_heliNames = OPFOR_HELI_NAMES;
 	_heliPrices = OPFOR_HELI_PRICES;
 };
@@ -29,9 +29,15 @@ if (str ((vehicle player) getVariable "price") != "") then {
 };
 deleteVehicle (vehicle player);
 
+_nearestHelipad = _heliPads select 0;
+{
+	if (player distance2D _x < player distance2D _nearestHelipad) then {
+		_nearestHelipad = _x;
+	}
+} forEach _helipads;
+
 player hideObject true;
-player setPos (position _helipad);
-player setDir (direction _helipad);
+player setPos (position _nearestHelipad);
 player setVelocity [0,0,0];
 
 createDialog "Sortie_Dialog";

@@ -8,7 +8,6 @@ _enemyAwards = 	[100,		500,		1000,		2500];
 
 if ((playableUnits) find (driver (vehicle _killer)) > -1 && _unitSide != _killerSide) then
 {
-	hint format["side unit: %1, side killer: %2",_unitSide,side _killer];
 	_name = getText(configFile >> "CfgVehicles" >> (typeOf _unit) >> "displayName");
 	_award = 0;
 	for "_i" from 0 to (count _enemyTypes - 1) do

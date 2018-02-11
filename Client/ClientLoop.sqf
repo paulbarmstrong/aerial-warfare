@@ -1,10 +1,8 @@
 disableSerialization;
 
-_helipad = bluforHelipad;
-_jetSpot = bluforJetSpot;
+_serviceLocations = BluforHelipads + [bluforJetSpot];
 if (side player == east) then {
-	_helipad = opforHelipad;
-	_jetSpot = opforJetSpot;
+	_serviceLocations = OpforHelipads + [opforJetSpot];
 };
 
 while {true} do
@@ -13,7 +11,13 @@ while {true} do
 	[] call FNC_DisplayHUDText;
 	
 	// If the aircraft is landed at base, spawn the landed at base function
-	if ((((vehicle player) distance2D _helipad) < 10 || ((vehicle player) distance2D _jetSpot) < 15) && {isTouchingGround (vehicle player) && (uiNamespace getVariable "repairState") == 0}) then {
+	_isNearServiceLoc = false;
+	{
+		if ((vehicle player) distance2D _x < 12) then {
+			_isNearServiceLoc = true;
+		}
+	} forEach _serviceLocations;
+	if (_isNearServiceLoc && {isTouchingGround (vehicle player) && (uiNamespace getVariable "repairState") == 0}) then {
 		uiNamespace setVariable ["repairState",1];
 		[] spawn FNC_HelipadService;
 	};

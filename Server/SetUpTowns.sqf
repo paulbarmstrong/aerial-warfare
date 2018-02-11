@@ -1,13 +1,17 @@
 disableSerialization;
 
+BluforHelipads = nearestObjects[getMarkerPos "respawn_west",["HeliH"],100];
+OpforHelipads = nearestObjects[getMarkerPos "respawn_east",["HeliH"],100];
+
 TownMarkers = 	["townMarker",		"townMarker_1"];
-TownFlags = 	[townFlag,			townFlag_1];
+TownFlags = 	[townFlag_0,			townFlag_1];
 TownNames = 	["Test Town 1",		"Test Town 2"];
 TownSizes = 	[50,				50];
 TownSizesSqr =	[];
 TownUnits =		[[],				[]];
 TownTurrets =	[[],				[]];
 TownTHolders =	[objNull,			objNull];
+TownHelipads = 	[objNull,			objNull];
 TownGroups = 	[grpNull,			grpNull];
 
 for "_i" from 0 to (count TownMarkers - 1) do {
@@ -38,6 +42,12 @@ for "_i" from 0 to (count TownMarkers - 1) do {
 		_x setDir _dir;
 		_x addEventHandler ["GetIn",format["[_this select 0,_this select 2,%1] spawn FNC_ManEnteredTurret",_i]];
 	} forEach _turrets;
+	
+	// Find the town's helipad
+	
+	_townHelipad = nearestObject[_flagPos,"HeliH"];
+	TownHelipads set [_i,_townHelipad];
+
 	
 	_emptyUnits = [];
 	for "_j" from 0 to (count _turrets - 1) do {

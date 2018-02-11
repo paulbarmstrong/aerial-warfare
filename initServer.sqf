@@ -11,6 +11,10 @@ FNC_InitializeVars = compileFinal preprocessFile "Server\InitializeVars.sqf";
 FNC_SetUpTowns = compileFinal preprocessFile "Server\SetUpTowns.sqf";
 FNC_DetectTownLoss = compileFinal preprocessFile "Server\DetectTownLoss.sqf";
 FNC_ManEnteredTurret = compileFinal preprocessFile "Server\ManEnteredTurret.sqf";
+FNC_UpdateWaypoint = compileFinal preprocessFile "Server\UpdateWaypoint.sqf";
+FNC_AITroopLanding = compileFinal preprocessFile "Server\AITroopLanding.sqf";
+FNC_AILandAtBase = compileFinal preprocessFile "Server\AILandAtBase.sqf";
+
 
 // Quickly Initialize some global variables:
 [] call FNC_InitializeVars;
@@ -18,7 +22,7 @@ FNC_ManEnteredTurret = compileFinal preprocessFile "Server\ManEnteredTurret.sqf"
 // Initialize town stuff
 //=========================================
 
-[] spawn FNC_SetUpTowns;
+[] call FNC_SetUpTowns;
 
 // Initialize playable AI stuff
 //=========================================
@@ -37,6 +41,11 @@ FNC_ManEnteredTurret = compileFinal preprocessFile "Server\ManEnteredTurret.sqf"
 	};
 	if (_side == west) then { _newMarker setMarkerColor "colorBLUFOR"; } else { _newMarker setMarkerColor "colorOPFOR"; };
 	//_newMarker setMarkerColor "colorUNKNOWN";
+	
+	// Add EventHandlers for AI respawn
+	if (!(isPlayer _x)) then {
+		_x addEventHandler ["Respawn","(_this select 0) spawn FNC_AIRespawn"];
+	};
 } forEach playableUnits;
 
 
@@ -58,7 +67,7 @@ OpforIncome = 0;
 {
 	if (!(isPlayer _x)) then
 	{
-		_x call FNC_AIRespawn;
+		_x spawn FNC_AIRespawn;
 	};
 } forEach playableUnits;
 

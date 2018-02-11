@@ -1,62 +1,139 @@
-removeAllActions _this;
+_man = _this;
 _group = group _this;
-_side = side _this;
+_side = side _group;
 
-_baseloc = getMarkerPos "respawn_west";
-_shopObjects = BLUFOR_COMMANDER_BUILDINGS;
-_vehiclePrices = BLUFOR_VEHICLE_PRICES;
-_vehicleClassnames = BLUFOR_VEHICLE_CLASSNAMES;
-_vehicleArrow = bluforVehicleArrow;
-
-if (side _this == east) then
-{
-//	_baseloc = getMarkerPos "respawn_east";
-//	_shopObjects = OPFOR_COMMANDER_BUILDINGS;
-//	_vehiclePrices = OPFOR_VEHICLE_PRICES;
-//	_vehicleClassnames = OPFOR_VEHICLE_CLASSNAMES;
-//	_vehicleArrow = _opforVehicleArrow;
+_helipads = BluforHelipads;
+_jetSpot = bluforJetSpot;
+_defaultRifleman = BLUFOR_DEFAULT_RIFLEMAN;
+_heliPrices = BLUFOR_HELI_PRICES;
+_armaPrices = BLUFOR_ARMA_PRICES;
+_armaClassnames = BLUFOR_ARMA_CLASSNAMES;
+_armaManualFire = BLUFOR_ARMA_MANUALFIRE;
+_armaPylonIsGunner = BLUFOR_ARMA_ISGUNNER;
+_armaPylons = BLUFOR_ARMA_PYLONS;
+if (_side == east) then {
+	_helipads = OpforHelipads;
+	_jetSpot = opforJetSpot;
+	_defaultRifleman = OPFOR_DEFAULT_RIFLEMAN;
+	_heliPrices = OPFOR_HELI_PRICES;
+	_armaPrices = OPFOR_ARMA_PRICES;
+	_armaClassnames = OPFOR_ARMA_CLASSNAMES;
+	_armaManualFire = OPFOR_ARMA_MANUALFIRE;
+	_armaPylonIsGunner = OPFOR_ARMA_ISGUNNER;
+	_armaPylons = OPFOR_ARMA_PYLONS;
 };
-_this setPos _baseLoc;
 
-if (!(isObjectHidden ((_shopObjects select 2) select 0))) then // vehicle shop is bought
+removeAllActions _man;
+
+// Determine which vehicle ai should buy
+_heliIndex = 0;
+_armaIndex = 0;
+
+// Sleep random so helis don't often spawn in the exact same tick
+sleep (random 3);
+
+
+// Calculate total price
+_specificArmaPrices = _armaPrices select _heliIndex;
+_totalPrice = (_heliPrices select _heliIndex) + (_specificArmaPrices select _armaIndex);
+
+// Subtract the money
+group _man setVariable["Money",(group _man getVariable "Money") - _totalPrice];
+
+
+// Fetch classname based on armaments
+_heliClassname = (_armaClassnames select _heliIndex) select _armaIndex;
+
+// Determine the best location to spawn
+_spawnSpot = _helipads select 0;
+_bestHeliDistance = 0;
 {
-	// Determine if the AI should by a vehicle, and which one
-	_bestVehicle = -1;
-	for "_i" from 0 to (count _vehiclePrices - 1) do
-	{
-		if ((_group getVariable "Money") / 2 >= _vehiclePrices select _i) then
-		{
-			_bestVehicle = _i;
-		};
-	};
-	
-	// Buy the vehicle if there is one
-	if (_bestVehicle > -1) then
-	{
-		_group setVariable["Money",(_group getVariable "Money") - (_itemPrices select _bestVehicle),true];
-		_newVehiclePosition = position _vehicleArrow findEmptyPosition[0,100,_vehicleClassnames select _bestVehicle];
-		_vehArgs = [_newVehiclePosition,getDir _vehicleArrow,_vehicleClassnames select _bestVehicle,_group] call BIS_fnc_spawnVehicle;
-		_newVeh = _vehArgs select 0;
-		{
-			if ((assignedVehicleRole _x) select 0 == "Driver") then {
-				deleteVehicle _x;
-			};
-			_x addEventHandler ["Killed","_this call FNC_EntityKilled"];
-			if (_side != west) then {[_x,"FNC_EnemyFromServer",west,false,true] call BIS_fnc_MP;};
-			if (_side != east) then {[_x,"FNC_EnemyFromServer",east,false,true] call BIS_fnc_MP;};
-		} forEach crew _newVeh;
-		_newVeh addEventHandler ["Killed","_this call FNC_EntityKilled"];
-		if (_side != west) then {[_newVeh,"FNC_EnemyFromServer",west,false,true] call BIS_fnc_MP;};
-		if (_side != east) then {[_newVeh,"FNC_EnemyFromServer",east,false,true] call BIS_fnc_MP;};
-		_this moveInDriver _newVeh;
-	};
-	
-	// Clear all waypoints and give them the waypoint to "guard" (capture) towns
-	while {count (waypoints _group) > 0} do
-	{
-		deleteWaypoint ((waypoints _group) select 0);
-	};
-	_group setBehaviour "AWARE";
-	_newWaypoint = _group addWaypoint[position _this,0];
-	_newWaypoint setWaypointType "GUARD";
+	_nearestHeli = nearestObject[position _x,"Helicopter"];
+	if (_nearestHeli isEqualTo objNull || {_nearestHeli distance2D _x > _bestHeliDistance}) then {
+		_spawnSpot = _x;
+		if (!(_nearestHeli isEqualTo objNull)) then {
+			_bestHeliDistance = _nearestHeli distance2D _x;
+		}
+	}
+} forEach _helipads;
+
+// Special spawn location for airplane
+_special = "FLY";
+if (_heliClassname isKindOf "Plane") then {
+	_spawnSpot = _jetSpot;
+	_special = "NONE";
 };
+
+// Create the vehicle
+_newVehiclePosition = position _spawnSpot findEmptyPosition[0,100,_heliClassname];
+_heli = createVehicle [_heliClassname, position _man, [], 0, _special];
+_heli allowDamage false;
+_heli setVariable ["price",_totalPrice];
+
+// Set position, rotation, and gear explicitly
+_heli setPos (_newVehiclePosition);
+_heli setDir (direction _spawnSpot);
+_heli action ["LandGear", _heli];
+
+// Create the crew (copilot, gunners...) and remove the pilot
+_heliGroup = createGroup [side _man,true];
+createVehicleCrew _heli;
+{
+	if ((assignedVehicleRole _x) select 0 == "Driver") then {
+		deleteVehicle _x;
+	} else {
+		_x allowDamage false;
+	};
+} forEach (crew _heli);
+
+
+// Move man in, lock them in, and make them visible
+_man moveInDriver _heli;
+
+_heli lock true;
+_heli setVehicleLock "LOCKED";
+_man allowDamage false;
+_heli addEventHandler ["Killed","{_x setDamage 1} forEach crew vehicle (_this select 0); (_this select 0) setDamage 1;"];
+_heli addEventHandler ["Hit","(vehicle (_this select 0)) call FNC_KeepEngineAlive;"];
+
+// Create the men in cargo (troops to capture bases, set up mortar...)
+_cargoCrewCount = ([_heliClassname,true] call BIS_fnc_crewCount) - ([_heliClassname,false] call BIS_fnc_crewCount);
+
+for "_i" from 0 to (_cargoCrewCount - 1) do {
+	_troop = _heliGroup createUnit[_defaultRifleman, position _spawnSpot, [], 0, "NONE"];
+	_troop assignAsCargo _heli;
+	_troop moveInCargo _heli;
+	_troop setVariable ["SoldierType","capture"];
+};
+
+// Take care of EventHandlers
+{
+	_x addEventHandler ["Killed","_this call FNC_EntityKilled"];
+	[_x,"FNC_EnemyFromServer",true,false,false] call BIS_fnc_MP;
+	if (_x != _man) then {
+		_x setVariable ["owner",_man];
+		[_x] joinSilent _heliGroup;
+	};
+} forEach (crew _heli);
+_heli addEventHandler ["Killed","_this call FNC_EntityKilled"];
+[_heli,"FNC_EnemyFromServer",true,false,false] call BIS_fnc_MP;
+_heli lockCargo true;
+
+_man call FNC_UpdateWaypoint;
+
+sleep 2;
+
+// If heli is still alive, make it damageable
+if (alive _heli) then {
+	_heli allowDamage true;
+} else {
+	// Otherwise, delete everything and respawn again
+	deleteVehicle _heli;
+	{
+		deleteVehicle _x;
+	} forEach units _heliGroup;
+	_man allowDamage true;
+	_man setDamage 1;
+};
+
+

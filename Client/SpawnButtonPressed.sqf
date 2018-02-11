@@ -1,6 +1,6 @@
 disableSerialization;
 
-_helipad = bluforHelipad;
+_helipads = BluforHelipads;
 _jetSpot = bluforJetSpot;
 _defaultRifleman = BLUFOR_DEFAULT_RIFLEMAN;
 _heliPrices = BLUFOR_HELI_PRICES;
@@ -10,7 +10,7 @@ _armaManualFire = BLUFOR_ARMA_MANUALFIRE;
 _armaPylonIsGunner = BLUFOR_ARMA_ISGUNNER;
 _armaPylons = BLUFOR_ARMA_PYLONS;
 if (side player == east) then {
-	_helipad = opforHelipad;
+	_helipads = OpforHelipads;
 	_jetSpot = opforJetSpot;
 	_defaultRifleman = OPFOR_DEFAULT_RIFLEMAN;
 	_heliPrices = OPFOR_HELI_PRICES;
@@ -27,6 +27,7 @@ _heliIndex = lbCurSel _heliList;
 _armaList = (findDisplay 8366) displayCtrl 1300;
 _armaIndex = lbCurSel _armaList;
 
+
 if (_heliIndex > -1 && _armaIndex > -1) then {
 
 	_specificArmaPrices = _armaPrices select _heliIndex;
@@ -42,7 +43,20 @@ if (_heliIndex > -1 && _armaIndex > -1) then {
 		// Fetch classname based on armaments
 		_heliClassname = (_armaClassnames select _heliIndex) select _armaIndex;
 		
-		_spawnSpot = _helipad;
+		// Determine the best location to spawn
+		_spawnSpot = _helipads select 0;
+		_bestHeliDistance = 0;
+		{
+			_nearestHeli = nearestObject[position _x,"Helicopter"];
+			if (_nearestHeli isEqualTo objNull || {_nearestHeli distance2D _x > _bestHeliDistance}) then {
+				_spawnSpot = _x;
+				if (!(_nearestHeli isEqualTo objNull)) then {
+					_bestHeliDistance = _nearestHeli distance2D _x;
+				}
+			}
+		} forEach _helipads;
+
+		// Special spawn location for airplane
 		_special = "FLY";
 		if (_heliClassname isKindOf "Plane") then {
 			_spawnSpot = _jetSpot;
@@ -106,10 +120,10 @@ if (_heliIndex > -1 && _armaIndex > -1) then {
 		_cargoCrewCount = ([_heliClassname,true] call BIS_fnc_crewCount) - ([_heliClassname,false] call BIS_fnc_crewCount);
 		
 		for "_i" from 0 to (_cargoCrewCount - 1) do {
-			_man = _heliGroup createUnit[_defaultRifleman, position player, [], 0, "NONE"];
-			_man assignAsCargo _heli;
-			_man moveInCargo _heli;
-			_man setVariable ["SoldierType","capture"];
+			_troop = _heliGroup createUnit[_defaultRifleman, position player, [], 0, "NONE"];
+			_troop assignAsCargo _heli;
+			_troop moveInCargo _heli;
+			_troop setVariable ["SoldierType","capture"];
 		};
 
 		// Take care of EventHandlers
@@ -143,19 +157,7 @@ if (_heliIndex > -1 && _armaIndex > -1) then {
 		uiNamespace setVariable ["aircraftSelection",_heliIndex];
 		uiNamespace setVariable ["armamentSelection",_armaIndex];
 		uiNamespace setVariable ["hasSetSelection",false];
-
-		// To try to avoid players crashing when both pulling at the same time
-		{ _heli disableCollisionWith _x; } forEach playableUnits;
-		
-	/*	_count = 0;
-		while {_count < 40} do {
-			_heli setVelocity [0,0,0];
-			_heli setPos (position _spawnSpot);
-			_count = _count + 1;
-			sleep 0.05;
-		}; */
-		sleep 5;
-		{ _heli enableCollisionWith _x; } forEach playableUnits;
+		sleep 8;
 		uiNamespace setVariable ["repairState",0];
 	} else {
 		hint "You do not have enough money to purchase this combination!";
