@@ -32,18 +32,24 @@ if (_isTransportHeli) then {
 		_newWaypoint setWaypointStatements ["true", "this spawn FNC_AILandAtBase"];
 	} else {
 		// Get closest town which isn't full populated with friendly units
-		_closestIndex = 0;
+		_bestIndex = 0;
+		_bestFactor = 0;
 		for "_i" from 0 to (count TownMarkers - 1) do {
-			if (((TownFlags select _i) distance2D _man < (TownFlags select _closestIndex) distance2D _man)
-				&& (side (TownGroups select _i) != _side || (TownUnits select _i) find objNull > -1)) then {
-				
-				_closestIndex = _i;
-			}
+			_townFactor = 100 - (((TownFlags select _i) distance2D _man) / 1000);
+			if (side (TownGroups select _i) != _side || (TownUnits select _i) find objNull > -1) then {
+				_townFactor = _townFactor + 100;
+			};
+			if (_townFactor > _bestFactor) then {
+				_bestIndex = _i;
+				_bestFactor = _townFactor;
+			};
 		};
+		
+		hint format ["got called on town %1 and %2",TownNames select _bestIndex,random 100];
 
 		// Tell them to go land there
 		_group setVariable ["lettingOutTroops", false];
-		_newWaypoint = _group addWaypoint[TownHelipads select _closestIndex,0];
+		_newWaypoint = _group addWaypoint[TownHelipads select _bestIndex,0];
 		_newWaypoint setWaypointType "MOVE";
 		_newWaypoint setWaypointStatements ["true", "this spawn FNC_AITroopLanding"];
 	};

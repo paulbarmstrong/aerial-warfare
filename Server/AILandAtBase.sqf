@@ -18,7 +18,13 @@ while {!isTouchingGround _heli && _timePassed < 45} do {
 	_timePassed = _timePassed + 1;
 };
 
-_man setDamage 1;
+
+{
+	_xUnit = _x select 0;
+	if (!(_xUnit isEqualTo _man)) then {
+		deleteVehicle _xUnit;
+	};
+} forEach (fullCrew _heli);
 deleteVehicle _heli;
 
 _man call FNC_AIRespawn;

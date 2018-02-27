@@ -12,7 +12,7 @@ if (!(_group getVariable "lettingOutTroops")) then {
 		_homePos = getMarkerPos "respawn_east";
 	};
 
-	_heli land "GET OUT";
+	_heli land "GET IN";
 
 	_closestTown = 0;
 	for "_i" from 0 to (count TownFlags - 1) do {
@@ -68,7 +68,8 @@ if (!(_group getVariable "lettingOutTroops")) then {
 			_heliManIndex = _heliManIndex + 1;
 		};
 	};
-
+	
+	_heli land "NONE";
 	_group call FNC_UpdateWaypoint;
 	
 };

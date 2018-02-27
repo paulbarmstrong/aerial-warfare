@@ -76,7 +76,14 @@ OpforIncome = 0;
 // Plans
 //=========================================
 
-// Infantry Transport Truck spawns at bases and drives to nearest town to drop off guys
+// Improve the algorithm for determining what towns AI go for
+// (by checking what other playableUnits waypoints are)
+
+// Create system for AI vehicles to spawn and go to towns
+
+// Make static guns have unlimited ammo, disable collision on town flags
+
+// Nerf the cannons on attack helicopters by doing disableAI "AUTOTARGET"
 
 
 
