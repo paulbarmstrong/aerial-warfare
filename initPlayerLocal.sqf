@@ -23,6 +23,7 @@ FNC_RepairUpTo = compileFinal preprocessFile "Client\RepairUpTo.sqf";
 FNC_KeepEngineAlive = compileFinal preprocessFile "Client\KeepEngineAlive.sqf";
 FNC_HelipadService = compileFinal preprocessFile "Client\HelipadService.sqf";
 FNC_SortieDelay = compileFinal preprocessFile "Client\SortieDelay.sqf";
+FNC_GunnerLook = compileFinal preprocessFile "Client\GunnerLook.sqf";
 
 
 //=========================================

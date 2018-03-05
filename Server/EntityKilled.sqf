@@ -43,6 +43,7 @@ for "_i" from 0 to (count TownMarkers - 1) do {
 			_newFlag = "FlagPole_F" createVehicle _flagPos;
 			_newFlag setPos _flagPos;
 			TownFlags set[_i,_newFlag];
+			TownGroups set[_i,grpNull];
 		};
 	};
 };

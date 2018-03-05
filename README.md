@@ -3,8 +3,8 @@
 ## Details
 
 * Author: Paul Armstrong
-* Date: November 2017 (As of February 2018 I am still working on this project)
-* Progress: ~60%
+* Date: November 2017 (As of March 2018 I am still working on this project)
+* Progress: ~70%
 
 ## Demonstration
 

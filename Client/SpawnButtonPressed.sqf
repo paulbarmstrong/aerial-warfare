@@ -138,7 +138,7 @@ if (_heliIndex > -1 && _armaIndex > -1) then {
 		_heli addEventHandler ["Killed","_this call FNC_EntityKilled"];
 		[_heli,"FNC_EnemyFromServer",true,false,false] call BIS_fnc_MP;
 		
-		_heliGroup setBehaviour "AWARE";
+		_heliGroup setBehaviour "CARELESS";
 		
 		// Activate manual fire if supposed to
 		if (_armaManualFire select _heliIndex select _armaIndex) then {

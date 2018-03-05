@@ -1,10 +1,10 @@
 disableSerialization;
 
 BLUFOR_DEFAULT_RIFLEMAN = "B_Soldier_F";
-BLUFOR_STATIC_TURRETS = ["B_HMG_01_high_F","B_static_AA_F"];
+BLUFOR_GARAGE_VEHICLES = ["B_MRAP_01_gmg_F", "B_MRAP_01_hmg_F"];
 
 OPFOR_DEFAULT_RIFLEMAN = "O_Soldier_F";
-OPFOR_STATIC_TURRETS = ["O_HMG_01_high_F","O_static_AA_F"];
+OPFOR_GARAGE_VEHICLES = ["O_MRAP_02_gmg_F", "O_MRAP_02_hmg_F"];
 
 
 _name = [];

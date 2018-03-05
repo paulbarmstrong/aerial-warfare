@@ -41,9 +41,10 @@ for "_i" from 0 to (count TownMarkers - 1) do {
 		_x attachTo [_tHolder];
 		_x setDir _dir;
 		_x addEventHandler ["GetIn",format["[_this select 0,_this select 2,%1] spawn FNC_ManEnteredTurret",_i]];
+		_x addEventHandler ["Fired","(_this select 0) setVehicleAmmo 1;"];
 	} forEach _turrets;
 	
-	// Find the town's helipad
+	// Find the town's primary helipad
 	
 	_townHelipad = nearestObject[_flagPos,"HeliH"];
 	TownHelipads set [_i,_townHelipad];

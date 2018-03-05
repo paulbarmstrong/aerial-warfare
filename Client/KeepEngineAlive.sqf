@@ -22,10 +22,13 @@ for "_i" from 0 to (count _damageList - 1) do {
 			};
 		};
 	};
-	
+};
+
+
+
+/*
 	// If the damage goes above 0.7, it should have died, destroy it
 	if (damage _vehicle > 0.7) then {
 		_vehicle setDamage 1;
 	}
-};
-
+*/

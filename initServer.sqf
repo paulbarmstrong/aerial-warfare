@@ -14,6 +14,9 @@ FNC_ManEnteredTurret = compileFinal preprocessFile "Server\ManEnteredTurret.sqf"
 FNC_UpdateWaypoint = compileFinal preprocessFile "Server\UpdateWaypoint.sqf";
 FNC_AITroopLanding = compileFinal preprocessFile "Server\AITroopLanding.sqf";
 FNC_AILandAtBase = compileFinal preprocessFile "Server\AILandAtBase.sqf";
+FNC_CreatePassiveVehicle = compileFinal preprocessFile "Server\CreatePassiveVehicle.sqf";
+FNC_UpdateVehicleWaypoint = compileFinal preprocessFile "Server\UpdateVehicleWaypoint.sqf";
+
 
 
 // Quickly Initialize some global variables:
@@ -45,6 +48,8 @@ FNC_AILandAtBase = compileFinal preprocessFile "Server\AILandAtBase.sqf";
 	// Add EventHandlers for AI respawn
 	if (!(isPlayer _x)) then {
 		_x addEventHandler ["Respawn","(_this select 0) spawn FNC_AIRespawn"];
+		_x addEventHandler ["Killed","_this call FNC_EntityKilled"];
+		[_x,"FNC_EnemyFromServer",true,false,false] call BIS_fnc_MP;
 	};
 } forEach playableUnits;
 
@@ -55,8 +60,12 @@ FNC_AILandAtBase = compileFinal preprocessFile "Server\AILandAtBase.sqf";
 BluforIncome = 0;
 OpforIncome = 0;
 
-// Create the trucks
+// Passive Vehicles
 //=========================================
+
+Blufor_Passive_Groups = [];
+Opfor_Passive_Groups = [];
+
 
 // Run scripts
 //=========================================
@@ -76,16 +85,7 @@ OpforIncome = 0;
 // Plans
 //=========================================
 
-// Improve the algorithm for determining what towns AI go for
-// (by checking what other playableUnits waypoints are)
-
 // Create system for AI vehicles to spawn and go to towns
-
-// Make static guns have unlimited ammo, disable collision on town flags
-
-// Nerf the cannons on attack helicopters by doing disableAI "AUTOTARGET"
-
-
 
 
 

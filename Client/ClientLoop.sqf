@@ -25,11 +25,15 @@ while {true} do
 	// If the aircraft is landed at a zone, spawn the troop out function
 	for "_i" from 0 to (count TownMarkers - 1) do {
 	
+		//hint format["TownGroups select 0: %1",TownGroups select 0];
+	
 		// If the aircraft is landed at a zone, spawn the troop out function
-		if ((TownGroups select _i isEqualTo grpNull || {side (TownGroups select _i) == side group player})
-			&& {(position player) distance2D (TownFlags select _i) < TownSizes select _i && isTouchingGround (vehicle player) && !(uiNamespace getVariable "isUnloadingTroops")}) then {
-			uiNamespace setVariable ["isUnloadingTroops",true];
-			_i spawn FNC_LetTroopsOut;
+		if (isTouchingGround (vehicle player)) then {
+			if ((TownGroups select _i isEqualTo grpNull || {side (TownGroups select _i) == side group player})
+				&& {(position player) distance2D (TownFlags select _i) < TownSizes select _i && !(uiNamespace getVariable "isUnloadingTroops")}) then {
+				uiNamespace setVariable ["isUnloadingTroops",true];
+				_i spawn FNC_LetTroopsOut;
+			};
 		};
 		
 		

@@ -1,6 +1,7 @@
 disableSerialization;
 
 _countdown = 5;
+_heli = vehicle player;
 
 sleep 1;
 
@@ -15,7 +16,7 @@ _countdown = _countdown - 1;
 sleep 1;
 };
 
-if (isTouchingGround (vehicle player) && vectorMagnitude velocity vehicle player < 5 && alive player) then {
+if (isTouchingGround (vehicle player) && vectorMagnitude velocity vehicle player < 5 && alive _heli) then {
 	uiNamespace setVariable ["repairState",2];
 	[] spawn FNC_Sortie;
 } else {

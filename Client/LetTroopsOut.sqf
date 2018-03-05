@@ -16,9 +16,10 @@ _units = TownUnits select _i;
 _turretSlotIndex = 0;
 _heliManIndex = 0;
 
+
 // While we are still touching the ground and there are turret slots open, let them out one at a time
 while {_heliManIndex < (count _cargoCrew) && _turretSlotIndex < count _turrets
-				&& isTouchingGround (vehicle player) && vectorMagnitude velocity vehicle player < 5} do {
+				&& isTouchingGround (vehicle player) && vectorMagnitude velocity vehicle player < 3} do {
 				
 	while {_turretSlotIndex < count _turrets && ((_units select _turretSlotIndex) != objNull
 				&& {alive (_units select _turretSlotIndex)})} do {

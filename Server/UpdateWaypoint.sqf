@@ -1,8 +1,8 @@
 disableSerialization;
 
-_man = leader _this;
+_group = _this;
+_man = leader _group;
 _heli = vehicle _man;
-_group = group _man;
 _side = side _group;
 _maxTroops = ([typeOf _heli,true] call BIS_fnc_crewCount) - ([typeOf _heli,false] call BIS_fnc_crewCount);
 _isTransportHeli = (_maxTroops > 0);
@@ -26,7 +26,9 @@ while {count (waypoints _group) > 0} do
 
 if (_isTransportHeli) then {
 	if (_troopCount < _maxTroops / 3) then {
+	
 		// Add waypoint to return to base and respawn
+		_group setVariable ["landingAtBase", false];
 		_newWaypoint = _group addWaypoint[_homePos,0];
 		_newWaypoint setWaypointType "MOVE";
 		_newWaypoint setWaypointStatements ["true", "this spawn FNC_AILandAtBase"];
@@ -39,14 +41,20 @@ if (_isTransportHeli) then {
 			if (side (TownGroups select _i) != _side || (TownUnits select _i) find objNull > -1) then {
 				_townFactor = _townFactor + 100;
 			};
+			{
+				if (side group _x == side _group && (count waypoints group _x) > 0) then { 
+					if ((waypointPosition [group _x,0]) distance2D (position (TownFlags select _i)) < 150) then {
+						_townFactor = _townFactor - 50;
+					};
+				};
+			} forEach playableUnits;
+			
 			if (_townFactor > _bestFactor) then {
 				_bestIndex = _i;
 				_bestFactor = _townFactor;
 			};
 		};
 		
-		hint format ["got called on town %1 and %2",TownNames select _bestIndex,random 100];
-
 		// Tell them to go land there
 		_group setVariable ["lettingOutTroops", false];
 		_newWaypoint = _group addWaypoint[TownHelipads select _bestIndex,0];

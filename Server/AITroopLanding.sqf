@@ -1,10 +1,10 @@
 disableSerialization;
 
-_group = group leader _this;
-_heli = vehicle leader _this;
+_group = group _this;
+_heli = vehicle _this;
 
 // Use this flag to avoid duplicate calls from the WaypointStatements
-if (!(_group getVariable "lettingOutTroops")) then {
+if (!(_group getVariable "lettingOutTroops") && !(_group getVariable "landingAtBase")) then {
 	_group setVariable ["lettingOutTroops", true];
 
 	_homePos = getMarkerPos "respawn_west";
@@ -12,7 +12,7 @@ if (!(_group getVariable "lettingOutTroops")) then {
 		_homePos = getMarkerPos "respawn_east";
 	};
 
-	_heli land "GET IN";
+	_heli land "LAND";
 
 	_closestTown = 0;
 	for "_i" from 0 to (count TownFlags - 1) do {
@@ -69,9 +69,12 @@ if (!(_group getVariable "lettingOutTroops")) then {
 		};
 	};
 	
-	_heli land "NONE";
-	_group call FNC_UpdateWaypoint;
-	
+	if (alive _heli) then {
+		_heli land "NONE";
+		_group setVariable ["lettingOutTroops", false];
+		_group call FNC_UpdateWaypoint;
+	};
 };
+
 
 

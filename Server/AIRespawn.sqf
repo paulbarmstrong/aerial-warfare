@@ -23,11 +23,14 @@ if (_side == east) then {
 	_armaPylons = OPFOR_ARMA_PYLONS;
 };
 
+_man allowDamage false;
 removeAllActions _man;
+
 
 // Determine which vehicle ai should buy
 _heliIndex = 0;
 _armaIndex = 0;
+
 
 // Sleep random so helis don't often spawn in the exact same tick
 sleep (random 3);
@@ -38,8 +41,10 @@ _specificArmaPrices = _armaPrices select _heliIndex;
 _totalPrice = (_heliPrices select _heliIndex) + (_specificArmaPrices select _armaIndex);
 
 // Subtract the money
-group _man setVariable["Money",(group _man getVariable "Money") - _totalPrice];
+_group setVariable["Money",(group _man getVariable "Money") - _totalPrice];
 
+_group setVariable ["lettingOutTroops", false];
+_group setVariable ["landingAtBase", false];
 
 // Fetch classname based on armaments
 _heliClassname = (_armaClassnames select _heliIndex) select _armaIndex;
@@ -70,13 +75,13 @@ _heli = createVehicle [_heliClassname, position _man, [], 0, _special];
 _heli allowDamage false;
 _heli setVariable ["price",_totalPrice];
 
+
 // Set position, rotation, and gear explicitly
 _heli setPos (_newVehiclePosition);
 _heli setDir (direction _spawnSpot);
 _heli action ["LandGear", _heli];
 
 // Create the crew (copilot, gunners...) and remove the pilot
-_heliGroup = createGroup [side _man,true];
 createVehicleCrew _heli;
 {
 	if ((assignedVehicleRole _x) select 0 == "Driver") then {
@@ -90,17 +95,25 @@ createVehicleCrew _heli;
 // Move man in, lock them in, and make them visible
 _man moveInDriver _heli;
 
+// Heli lock and heli eventhandlers
 _heli lock true;
 _heli setVehicleLock "LOCKED";
-_man allowDamage false;
-_heli addEventHandler ["Killed","{_x setDamage 1} forEach crew vehicle (_this select 0); (_this select 0) setDamage 1;"];
+_heli setVariable ["assigned_group",_group];
+_heli addEventHandler ["Killed","
+	{
+		_x allowDamage true;
+		if (vehicle _x == _x) then {
+			_x setDamage 1;
+		};
+	} forEach units ((_this select 0) getVariable 'assigned_group');
+"];
 _heli addEventHandler ["Hit","(vehicle (_this select 0)) call FNC_KeepEngineAlive;"];
 
 // Create the men in cargo (troops to capture bases, set up mortar...)
 _cargoCrewCount = ([_heliClassname,true] call BIS_fnc_crewCount) - ([_heliClassname,false] call BIS_fnc_crewCount);
 
 for "_i" from 0 to (_cargoCrewCount - 1) do {
-	_troop = _heliGroup createUnit[_defaultRifleman, position _spawnSpot, [], 0, "NONE"];
+	_troop = _group createUnit[_defaultRifleman, position _spawnSpot, [], 0, "NONE"];
 	_troop assignAsCargo _heli;
 	_troop moveInCargo _heli;
 	_troop setVariable ["SoldierType","capture"];
@@ -108,32 +121,43 @@ for "_i" from 0 to (_cargoCrewCount - 1) do {
 
 // Take care of EventHandlers
 {
-	_x addEventHandler ["Killed","_this call FNC_EntityKilled"];
-	[_x,"FNC_EnemyFromServer",true,false,false] call BIS_fnc_MP;
-	if (_x != _man) then {
+	if (_x != _man) then { // 			if (!((group driver (_this select 2)) getVariable 'lettingOutTroops') || (((_this select 0) getVariable 'SoldierType') != 'capture')) then {
+
+		_x addEventHandler ["GetOutMan","
+			if (((_this select 0) getVariable 'SoldierType') != 'capture') then {
+				(_this select 0) allowDamage true;
+				(_this select 0) setDamage 1;
+			};"
+		];
+		_x addEventHandler ["Killed","_this call FNC_EntityKilled"];
+		[_x,"FNC_EnemyFromServer",true,false,false] call BIS_fnc_MP;
 		_x setVariable ["owner",_man];
-		[_x] joinSilent _heliGroup;
+		[_x] joinSilent _group;
 	};
 } forEach (crew _heli);
 _heli addEventHandler ["Killed","_this call FNC_EntityKilled"];
 [_heli,"FNC_EnemyFromServer",true,false,false] call BIS_fnc_MP;
-_heli lockCargo true;
+_heli allowCrewInImmobile true;
 
-_man call FNC_UpdateWaypoint;
-
-sleep 2;
+sleep 4;
 
 // If heli is still alive, make it damageable
 if (alive _heli) then {
 	_heli allowDamage true;
-} else {
+	_group spawn FNC_UpdateWaypoint;
+};
+
+
+/*
+
+else {
 	// Otherwise, delete everything and respawn again
 	deleteVehicle _heli;
 	{
 		deleteVehicle _x;
-	} forEach units _heliGroup;
+	} forEach units _group;
 	_man allowDamage true;
 	_man setDamage 1;
 };
 
-
+*/
