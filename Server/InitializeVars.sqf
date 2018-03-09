@@ -1,10 +1,21 @@
 disableSerialization;
 
 BLUFOR_DEFAULT_RIFLEMAN = "B_Soldier_F";
-BLUFOR_GARAGE_VEHICLES = ["B_MRAP_01_gmg_F", "B_MRAP_01_hmg_F"];
+
+BLUFOR_CONVOY_VEHICLES = ["B_MRAP_01_gmg_F",			"B_MRAP_01_F",		"B_MRAP_01_hmg_F"];
+
+BLUFOR_SLINGABLES = [		"",	"B_G_Offroad_01_armed_F",	"B_MRAP_01_hmg_F",	"B_MRAP_01_gmg_F"];
+BLUFOR_SLINGABLE_PRICES = [	0,			250,						500,				500];
+
 
 OPFOR_DEFAULT_RIFLEMAN = "O_Soldier_F";
-OPFOR_GARAGE_VEHICLES = ["O_MRAP_02_gmg_F", "O_MRAP_02_hmg_F"];
+
+OPFOR_CONVOY_VEHICLES = ["O_MRAP_02_gmg_F", "O_MRAP_02_F", "O_MRAP_02_hmg_F"];
+
+OPFOR_SLINGABLES = [		"",		"O_G_Offroad_01_armed_F",	"O_MRAP_02_hmg_F",	"O_MRAP_02_gmg_F"];
+OPFOR_SLINGABLE_PRICES = [	0,		250,						500,				500];
+
+
 
 
 _name = [];
@@ -15,6 +26,7 @@ _armaPrice = [];
 _armaManualFire = [];
 _armaPylonClasses = [];
 _armaPylonIsGunner = [];
+_slingNum = [];
 
 _name = _name + ["MH-9 Hummingbird"];
 _price = _price + [0];
@@ -24,6 +36,7 @@ _armaPrice = _armaPrice + [[					0]];
 _armaManualFire = _armaManualFire + [[			false]];
 _armaPylonClasses = _armaPylonClasses + [[		[]]];
 _armaPylonIsGunner = _armaPylonIsGunner + [[	[]]];
+_slingNum = _slingNum + [[						0]];
 
 
 _name = _name + ["AH-9 Pawnee"];
@@ -34,6 +47,7 @@ _armaPrice = _armaPrice + [[					0,										500]];
 _armaManualFire = _armaManualFire + [[			false,									false]];
 _armaPylonClasses = _armaPylonClasses + [[		[],										["PylonRack_12Rnd_missiles","PylonRack_12Rnd_missiles"]]];
 _armaPylonIsGunner = _armaPylonIsGunner + [[	[],										[false,false]]];
+_slingNum = _slingNum + [[						0,										0]];
 
 
 _name = _name + ["UH-80 Ghost Hawk"];
@@ -44,6 +58,7 @@ _armaPrice = _armaPrice + [[					0]];
 _armaManualFire = _armaManualFire + [[			false]];
 _armaPylonClasses = _armaPylonClasses + [[		[]]];
 _armaPylonIsGunner = _armaPylonIsGunner + [[	[]]];
+_slingNum = _slingNum + [[						1]];
 
 
 _name = _name + ["AH-99 Blackfoot"];
@@ -54,6 +69,7 @@ _armaPrice = _armaPrice + [[					0,										500]];
 _armaManualFire = _armaManualFire + [[			true,									true]];
 _armaPylonClasses = _armaPylonClasses + [[		[],										["PylonRack_12Rnd_PG_missiles","PylonRack_12Rnd_PG_missiles","",""]]];
 _armaPylonIsGunner = _armaPylonIsGunner + [[	[],										[true,true,true,true]]];
+_slingNum = _slingNum + [[						0,										0]];
 
 
 _name = _name + ["V-44 X Blackfish"];
@@ -64,7 +80,7 @@ _armaPrice = _armaPrice + [[					0]];
 _armaManualFire = _armaManualFire + [[			false]];
 _armaPylonClasses = _armaPylonClasses + [[		[]]];
 _armaPylonIsGunner = _armaPylonIsGunner + [[	[]]];
-
+_slingNum = _slingNum + [[						0]];
 
 
 BLUFOR_HELI_NAMES = _name;
@@ -75,6 +91,8 @@ BLUFOR_ARMA_PRICES = _armaPrice;
 BLUFOR_ARMA_MANUALFIRE = _armaManualFire;
 BLUFOR_ARMA_PYLONS = _armaPylonClasses;
 BLUFOR_ARMA_ISGUNNER = _armaPylonIsGunner;
+BLUFOR_SLING_NUMS = _slingNum;
+
 
 
 
@@ -87,6 +105,7 @@ _armaPrice = [];
 _armaManualFire = [];
 _armaPylonClasses = [];
 _armaPylonIsGunner = [];
+_slingNum = [];
 
 _name = _name + ["PO-30 Orca"];
 _price = _price + [0];
@@ -96,16 +115,18 @@ _armaPrice = _armaPrice + [[					0,								1000,								2000]];
 _armaManualFire = _armaManualFire + [[			false,							false,								false]];
 _armaPylonClasses = _armaPylonClasses + [[		[],								["PylonWeapon_2000Rnd_65x39_belt"],	["PylonWeapon_2000Rnd_65x39_belt","PylonRack_12Rnd_PG_missiles"]]];
 _armaPylonIsGunner = _armaPylonIsGunner + [[	[],								[false],							[false,false]]];
+_slingNum = _slingNum + [[						1,								1,									1]];
 
 
 _name = _name + ["Mi-290 Taru"];
 _price = _price + [1000];
-_armaNames = _armaNames + [[					"Empty"]];
-_armaHeliClasses = _armaHeliClasses + [[		"O_Heli_Transport_04_covered_F"]];
-_armaPrice = _armaPrice + [[					0]];
-_armaManualFire = _armaManualFire + [[			false]];
-_armaPylonClasses = _armaPylonClasses + [[		[]]];
-_armaPylonIsGunner = _armaPylonIsGunner + [[	[]]];
+_armaNames = _armaNames + [[					"Troop Transport",					"Sling Loading"]];
+_armaHeliClasses = _armaHeliClasses + [[		"O_Heli_Transport_04_covered_F",	"O_Heli_Transport_04_F"]];
+_armaPrice = _armaPrice + [[					0,									0]];
+_armaManualFire = _armaManualFire + [[			false,								false]];
+_armaPylonClasses = _armaPylonClasses + [[		[],									[]]];
+_armaPylonIsGunner = _armaPylonIsGunner + [[	[],									[]]];
+_slingNum = _slingNum + [[						0,									2]];
 
 
 _name = _name + ["Mi-48 Kajman"];
@@ -116,6 +137,8 @@ _armaPrice = _armaPrice + [[					0,										1000]];
 _armaManualFire = _armaManualFire + [[			true,									true]];
 _armaPylonClasses = _armaPylonClasses + [[		[],										["","PylonRack_19Rnd_Rocket_Skyfire","PylonRack_19Rnd_Rocket_Skyfire",""]]];
 _armaPylonIsGunner = _armaPylonIsGunner + [[	[],										[true,true,true,true]]];
+_slingNum = _slingNum + [[						1,										1]];
+
 
 _name = _name + ["Y-32 Xi'an"];
 _price = _price + [4000];
@@ -125,6 +148,7 @@ _armaPrice = _armaPrice + [[					0,										1000]];
 _armaManualFire = _armaManualFire + [[			true,									true]];
 _armaPylonClasses = _armaPylonClasses + [[		[],										["","PylonRack_19Rnd_Rocket_Skyfire","PylonRack_19Rnd_Rocket_Skyfire",""]]];
 _armaPylonIsGunner = _armaPylonIsGunner + [[	[],										[true,true,true,true]]];
+_slingNum = _slingNum + [[						0,										0]];
 
 
 
@@ -136,6 +160,7 @@ OPFOR_ARMA_PRICES = _armaPrice;
 OPFOR_ARMA_MANUALFIRE = _armaManualFire;
 OPFOR_ARMA_PYLONS = _armaPylonClasses;
 OPFOR_ARMA_ISGUNNER = _armaPylonIsGunner;
+OPFOR_SLING_NUMS = _slingNum;
 
 
 

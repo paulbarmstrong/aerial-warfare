@@ -77,6 +77,7 @@ if (_isTransportHeli) then {
 		_newWaypoint = _group addWaypoint[_x,0];
 		_newWaypoint setWaypointType "DESTROY";
 	} forEach (units (TownGroups select _closestIndex));
+
 	
 	// Add final waypoint to return to base and respawn
 	_newWaypoint = _group addWaypoint[_homePos,0];

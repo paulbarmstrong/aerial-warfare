@@ -12,7 +12,7 @@
 
 ## Description
 
-"Capture the Island: Airborne" is a game-mode for Arma 3 I've been creating for a few months now. The premise of the game-mode is that all players are pilots of helicopters and airplanes. Players must communicate and play as a team in order to complete objectives.
+Airborne is a game-mode for Arma 3 I've been working on for a few months now. The premise of the game-mode is that all players are pilots of helicopters and airplanes. Players must communicate and play as a team in order to complete objectives.
 
 The arma engine's SQF language is very old and quirky, so that is why some of the code might look inefficient or unnecessary (For example, the SQF language does not feature implicit short circuit evaluation).
 

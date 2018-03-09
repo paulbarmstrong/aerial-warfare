@@ -46,3 +46,4 @@ if (_chosenHeli != "") then {
 	_spawnButton ctrlSetTextColor [0.5,0.5,0.5,1];
 };
 
+

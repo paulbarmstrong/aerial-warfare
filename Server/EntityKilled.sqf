@@ -6,20 +6,49 @@ _killerSide = side (group _killer);
 _enemyTypes = 	["Man",		"Car",		"Tank",		"Helicopter"];
 _enemyAwards = 	[100,		500,		1000,		2500];
 
-if ((playableUnits) find (driver (vehicle _killer)) > -1 && _unitSide != _killerSide) then
-{
-	_name = getText(configFile >> "CfgVehicles" >> (typeOf _unit) >> "displayName");
-	_award = 0;
-	for "_i" from 0 to (count _enemyTypes - 1) do
-	{
-		if (_unit isKindOf (_enemyTypes select _i)) then
+
+if (_unitSide != _killerSide) then {
+	if (playableUnits find (driver (vehicle _killer)) > -1) then {
+	
+		// In this case the kill was committed by a player's aircraft
+		_name = getText(configFile >> "CfgVehicles" >> (typeOf _unit) >> "displayName");
+		_award = 0;
+		for "_i" from 0 to (count _enemyTypes - 1) do
 		{
-			_award = _enemyAwards select _i;
+			if (_unit isKindOf (_enemyTypes select _i)) then
+			{
+				_award = _enemyAwards select _i;
+			};
+		};
+		_killer groupChat format["Neutralized enemy %2 | +$%1",_award,_name];
+		(group _killer) setVariable["Money",(group _killer getVariable "Money") + _award,true];
+	} else {
+		if (playableUnits find (_killer getVariable "owner") > -1) then {
+		
+			// In this case the kill was committed by a player's sling vehicle
+			_player = _killer getVariable "owner";
+			_friendlyName = getText(configFile >> "CfgVehicles" >> (typeOf (vehicle _killer)) >> "displayName");
+			_enemyName = getText(configFile >> "CfgVehicles" >> (typeOf _unit) >> "displayName");
+			_award = 0;
+			for "_i" from 0 to (count _enemyTypes - 1) do
+			{
+				if (_unit isKindOf (_enemyTypes select _i)) then
+				{
+					_award = _enemyAwards select _i;
+				};
+			};
+			_player groupChat format["Your %1 Neutralized an enemy %2 | +$%3", _friendlyName, _enemyName, _award];
+			(group _player) setVariable["Money",(group _player getVariable "Money") + _award, true];
+			
+			
+			
 		};
 	};
-	_killer groupChat format["Neutralized enemy %2 | +$%1",_award,_name];
-	(group _killer) setVariable["Money",(group _killer getVariable "Money") + _award,true];
 };
+
+
+
+
 
 // Do things if this guy was guarding a base
 

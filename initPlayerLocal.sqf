@@ -11,6 +11,7 @@ FNC_HideMarker = compileFinal preprocessFile "Client\HideMarker.sqf";
 FNC_KeyDown = compileFinal preprocessFile "Client\KeyDown.sqf";
 FNC_HeliSelChanged = compileFinal preprocessFile "Client\HeliSelChanged.sqf";
 FNC_ArmaSelChanged = compileFinal preprocessFile "Client\ArmaSelChanged.sqf";
+FNC_SlingSelChanged = compileFinal preprocessFile "Client\SlingSelChanged.sqf";
 FNC_SpawnButtonPressed = compileFinal preprocessFile "Client\SpawnButtonPressed.sqf";
 FNC_InventoryOpened = compileFinal preprocessFile "Client\InventoryOpened.sqf";
 FNC_Sortie = compileFinal preprocessFile "Client\Sortie.sqf";

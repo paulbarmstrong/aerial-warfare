@@ -15,31 +15,21 @@ if (side player == east) then {
 	_slingNums = OPFOR_SLING_NUMS;
 };
 
+
 _spawnButton = (findDisplay 8366) displayCtrl 1600;
 
 _heliList = (findDisplay 8366) displayCtrl 1200;
 _heliIndex = lbCurSel _heliList;
-_chosenHeli = _heliList lbText _heliIndex;
 
 _armaList = (findDisplay 8366) displayCtrl 1300;
 _armaIndex = lbCurSel _armaList;
-_chosenArma = _armaList lbText _armaIndex;
 
 _slingList = (findDisplay 8366) displayCtrl 1400;
 _slingNum = (_slingNums select _heliIndex) select _armaIndex;
+_slingIndex = lbCurSel _slingList;
+_chosenSling = _slingList lbText _armaIndex;
 
-if (_chosenArma != "") then {
-	
-	// Reset and repopulate the list
-	lbClear _slingList;
-	for "_i" from 0 to _slingNum do {
-		_displayName = "Empty";
-		if (!((_slingables select _i) isEqualTo "")) then {
-			_displayName = getText(configFile >> "CfgVehicles" >> (_slingables select _i) >> "displayName");
-		};
-		_currentIndex = _slingList lbAdd format["%1 ($%2)",_displayName, _slingPrices select _i];
-	};
-	_slingList lbSetCurSel 0;
+if (_slingIndex > -1) then {
 	
 	// Calculate the total price
 	_slingIndex = lbCurSel _slingList;

@@ -119,7 +119,7 @@ class Sortie_Dialog
 		};
 		
 		// Special troop selection placeholder
-		class TroopList: RscListbox
+		class SlingList: RscListbox
 		{
 			idc = 1400;
 			text = "Test"; //--- ToDo: Localize;
@@ -135,12 +135,12 @@ class Sortie_Dialog
 			colorSelectBackground[] = {0,0.5,1,0.6};
 			colorSelectBackground2[] = {0,0.5,1,0.6};
 			
-			onLBSelChanged = [] spawn FNC_HeliSelChanged;
+			onLBSelChanged = [] spawn FNC_SlingSelChanged;
 		};
-		class TroopListTitle: RscStructuredText
+		class SlingListTitle: RscStructuredText
 		{
 			idc = 1401;
-			text = "Select Troops:"; //--- ToDo: Localize;
+			text = "Select load:"; //--- ToDo: Localize;
 			x = 0.62478205 * safezoneW + safezoneX;
 			y = 0.355624 * safezoneH + safezoneY;
 			w = 0.1278752 * safezoneW;

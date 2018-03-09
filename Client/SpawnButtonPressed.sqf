@@ -9,6 +9,9 @@ _armaClassnames = BLUFOR_ARMA_CLASSNAMES;
 _armaManualFire = BLUFOR_ARMA_MANUALFIRE;
 _armaPylonIsGunner = BLUFOR_ARMA_ISGUNNER;
 _armaPylons = BLUFOR_ARMA_PYLONS;
+_slingables = BLUFOR_SLINGABLES;
+_slingPrices = BLUFOR_SLINGABLE_PRICES;
+_slingNums = BLUFOR_SLING_NUMS;
 if (side player == east) then {
 	_helipads = OpforHelipads;
 	_jetSpot = opforJetSpot;
@@ -19,6 +22,9 @@ if (side player == east) then {
 	_armaManualFire = OPFOR_ARMA_MANUALFIRE;
 	_armaPylonIsGunner = OPFOR_ARMA_ISGUNNER;
 	_armaPylons = OPFOR_ARMA_PYLONS;
+	_slingables = OPFOR_SLINGABLES;
+	_slingPrices = OPFOR_SLINGABLE_PRICES;
+	_slingNums = OPFOR_SLING_NUMS;
 };
 
 _heliList = (findDisplay 8366) displayCtrl 1200;
@@ -27,12 +33,15 @@ _heliIndex = lbCurSel _heliList;
 _armaList = (findDisplay 8366) displayCtrl 1300;
 _armaIndex = lbCurSel _armaList;
 
+_slingList = (findDisplay 8366) displayCtrl 1400;
+_slingIndex = lbCurSel _slingList;
 
-if (_heliIndex > -1 && _armaIndex > -1) then {
+
+if (_heliIndex > -1 && _armaIndex > -1 && _slingIndex > -1) then {
 
 	_specificArmaPrices = _armaPrices select _heliIndex;
-	_totalPrice = (_heliPrices select _heliIndex) + (_specificArmaPrices select _armaIndex);
-
+	_totalPrice = (_heliPrices select _heliIndex) + (_specificArmaPrices select _armaIndex) + (_slingPrices select _slingIndex);
+	
 	if ((group player getVariable "Money") >= _totalPrice) then {
 
 		// Subtract the money and close the menu
@@ -58,14 +67,16 @@ if (_heliIndex > -1 && _armaIndex > -1) then {
 
 		// Special spawn location for airplane
 		_special = "FLY";
+		_delayBeforeService = 5;
 		if (_heliClassname isKindOf "Plane") then {
 			_spawnSpot = _jetSpot;
 			_special = "NONE";
+			_delayBeforeService = 10;
 		};
 		
-		// Create the vehicle
+		// Create the aircraft
 		_heli = createVehicle [_heliClassname, position player, [], 0, _special];
-		_heli setVariable ["price",_totalPrice];
+		_heli setVariable ["price",_totalPrice - (_slingPrices select _slingIndex)];
 			
 		// Do some arma wizardry to get an array of the heli's available pylons
 		_helisPylons = "true" configClasses (configFile >> "CfgVehicles" >> _heliClassname >> "Components" >> "TransportPylonsComponent" >> "pylons") apply {configName _x};
@@ -97,7 +108,7 @@ if (_heliIndex > -1 && _armaIndex > -1) then {
 		_heli action ["LandGear", _heli];
 		
 		// Create the crew (copilot, gunners...) and remove the pilot
-		_heliGroup = createGroup [side player,true];
+		_heliGroup = createGroup [side group player,true];
 		createVehicleCrew _heli;
 		{
 			if ((assignedVehicleRole _x) select 0 == "Driver") then {
@@ -147,6 +158,36 @@ if (_heliIndex > -1 && _armaIndex > -1) then {
 		
 	//	hint format["%1",[(configFile >> "CfgVehicles" >> "B_HMG_01_high_F"),true ] call BIS_fnc_returnParents];
 	//	copyToClipboard format["%1",_heli getCompatiblePylonMagazines 1];
+	
+		if (_slingIndex > 0) then {
+		
+			// Elevate the heli
+			_heli setPos ((position _spawnSpot) vectorAdd [0,0,10]);
+		
+			// Create the sling load
+			_vehGroup = createGroup [side group player , true];
+			_vehClassname = _slingables select _slingIndex;
+			_vehArgs = [position _spawnSpot, direction _spawnSpot, _vehClassname, _vehGroup] call BIS_fnc_spawnVehicle;
+			_veh = _vehArgs select 0;
+			_fullCrew = units _vehGroup;
+
+			// Lock the vehicle immediately
+			_veh lock true;
+			_veh allowCrewInImmobile true;
+			
+			// Perform the sling loading
+			_heli setSlingLoad _veh;
+			
+			// Do Event handlers
+			{
+				_x addEventHandler ["Killed","_this call FNC_EntityKilled"];
+				[_x,"FNC_EnemyFromServer",true,false,false] call BIS_fnc_MP;
+				_x setVariable ["owner", player];
+			} forEach _fullCrew;
+			_veh addEventHandler ["Killed","_this call FNC_EntityKilled"];
+			[_veh,"FNC_EnemyFromServer",true,false,false] call BIS_fnc_MP;
+		
+		};
 
 		
 		// Announce to the server that the player has pulled the heli
@@ -157,7 +198,7 @@ if (_heliIndex > -1 && _armaIndex > -1) then {
 		uiNamespace setVariable ["aircraftSelection",_heliIndex];
 		uiNamespace setVariable ["armamentSelection",_armaIndex];
 		uiNamespace setVariable ["hasSetSelection",false];
-		sleep 8;
+		sleep _delayBeforeService;
 		uiNamespace setVariable ["repairState",0];
 	} else {
 		hint "You do not have enough money to purchase this combination!";

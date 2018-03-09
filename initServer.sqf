@@ -14,8 +14,8 @@ FNC_ManEnteredTurret = compileFinal preprocessFile "Server\ManEnteredTurret.sqf"
 FNC_UpdateWaypoint = compileFinal preprocessFile "Server\UpdateWaypoint.sqf";
 FNC_AITroopLanding = compileFinal preprocessFile "Server\AITroopLanding.sqf";
 FNC_AILandAtBase = compileFinal preprocessFile "Server\AILandAtBase.sqf";
-FNC_CreatePassiveVehicle = compileFinal preprocessFile "Server\CreatePassiveVehicle.sqf";
-FNC_UpdateVehicleWaypoint = compileFinal preprocessFile "Server\UpdateVehicleWaypoint.sqf";
+FNC_CreateConvoy = compileFinal preprocessFile "Server\CreateConvoy.sqf";
+FNC_UpdateConvoyWaypoint = compileFinal preprocessFile "Server\UpdateConvoyWaypoint.sqf";
 
 
 
@@ -63,8 +63,8 @@ OpforIncome = 0;
 // Passive Vehicles
 //=========================================
 
-Blufor_Passive_Groups = [];
-Opfor_Passive_Groups = [];
+Blufor_Convoy_Groups = [grpNull, grpNull, grpNull];
+Opfor_Convoy_Groups = [grpNull, grpNull, grpNull];
 
 
 // Run scripts
@@ -85,7 +85,9 @@ Opfor_Passive_Groups = [];
 // Plans
 //=========================================
 
-// Create system for AI vehicles to spawn and go to towns
+// Make aircraft service deal with sling cars
+
+// Implement waypoints for sling vehicles
 
 
 
