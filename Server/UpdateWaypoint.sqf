@@ -25,7 +25,7 @@ while {count (waypoints _group) > 0} do
 };
 
 if (_isTransportHeli) then {
-	if (_troopCount < _maxTroops / 3) then {
+	if (_troopCount < _maxTroops / 2) then {
 	
 		// Add waypoint to return to base and respawn
 		_group setVariable ["landingAtBase", false];

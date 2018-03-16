@@ -81,6 +81,12 @@ _heli setPos (_newVehiclePosition);
 _heli setDir (direction _spawnSpot);
 _heli action ["LandGear", _heli];
 
+// Replace heli texture if applicable
+_texNum = TEX_REPLACE_CLASSNAMES find _heliClassname;
+if (_texNum > -1) then {
+	_heli setObjectTexture [TEX_REPLACE_INDICES select _texNum, TEX_REPLACE_TEXTURES select _texNum];
+};
+
 // Create the crew (copilot, gunners...) and remove the pilot
 createVehicleCrew _heli;
 {
@@ -95,7 +101,7 @@ createVehicleCrew _heli;
 // Move man in, lock them in, and make them visible
 _man moveInDriver _heli;
 
-// Heli lock and heli eventhandlers
+// Heli lock and lock-related heli eventhandlers
 _heli lock true;
 _heli setVehicleLock "LOCKED";
 _heli setVariable ["assigned_group",_group];
@@ -135,6 +141,8 @@ for "_i" from 0 to (_cargoCrewCount - 1) do {
 		[_x] joinSilent _group;
 	};
 } forEach (crew _heli);
+_heli addEventHandler ["Hit","_this call FNC_AddAssistMember"];
+_heli setVariable ["listOfAssists",[]];
 _heli addEventHandler ["Killed","_this call FNC_EntityKilled"];
 [_heli,"FNC_EnemyFromServer",true,false,false] call BIS_fnc_MP;
 _heli allowCrewInImmobile true;

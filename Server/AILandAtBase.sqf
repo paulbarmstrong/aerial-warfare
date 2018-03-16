@@ -5,7 +5,7 @@ _group = group _man;
 _heli = vehicle _man;
 
 // Use this flag to avoid duplicate calls from the WaypointStatements
-if (!(_group getVariable "lettingOutTroops") && !(_group getVariable "landingAtBase")) then {
+if ((playableUnits find _man > -1) && !(_group getVariable "lettingOutTroops") && !(_group getVariable "landingAtBase")) then {
 	_group setVariable ["landingAtBase", true];
 
 	_homePos = getMarkerPos "respawn_west";
@@ -30,13 +30,13 @@ if (!(_group getVariable "lettingOutTroops") && !(_group getVariable "landingAtB
 	} forEach (fullCrew _heli);
 	deleteVehicle _heli;
 
-	_man call FNC_AIRespawn;
-
 	_group setVariable ["landingAtBase", false];
 	
-	if (alive _heli) then {
+	_man spawn FNC_AIRespawn;
+	
+/*	if (alive _heli) then {
 		_heli land "NONE";
 		_group setVariable ["landingAtBase", false];
 		_group call FNC_UpdateWaypoint;
-	};
+	}; */
 };

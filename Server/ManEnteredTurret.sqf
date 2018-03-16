@@ -4,6 +4,8 @@ _turret = _this select 0;
 _man = _this select 1;
 _i = _this select 2;
 
+_man setDamage 0;
+
 _oldGroup = group _man;
 
 if (TownGroups select _i isEqualTo grpNull) then {

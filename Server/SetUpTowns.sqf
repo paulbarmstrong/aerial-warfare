@@ -1,32 +1,30 @@
 disableSerialization;
 
-BluforHelipads = nearestObjects[getMarkerPos "respawn_west",["HeliH"],100];
-OpforHelipads = nearestObjects[getMarkerPos "respawn_east",["HeliH"],100];
+BluforHelipads = nearestObjects[getMarkerPos "respawn_west", ["HeliH"], 100];
+OpforHelipads = nearestObjects[getMarkerPos "respawn_east", ["HeliH"], 100];
 
-TownMarkers = 	["townMarker",		"townMarker_1"];
-TownFlags = 	[townFlag_0,			townFlag_1];
-TownNames = 	["Test Town 1",		"Test Town 2"];
-TownSizes = 	[50,				50];
-TownSizesSqr =	[];
-TownUnits =		[[],				[]];
-TownTurrets =	[[],				[]];
-TownTHolders =	[objNull,			objNull];
-TownHelipads = 	[objNull,			objNull];
-TownGroups = 	[grpNull,			grpNull];
+TownMarkers = 	["townMarker",					"townMarker_1",				"townMarker_2"];
+TownFlags = 	[townFlag_0,					townFlag_1,					townFlag_2];
+TownNames = 	["Agia Maria Landing Zone",		"Camp Maxwell Landing Zone","Landing Zone Connor"];
+TownSizes = 	[50,							50,							50];
+
+
+TownUnits =		[];
+TownTurrets =	[];
+TownTHolders =	[];
+TownHelipads = 	[];
+TownGroups = 	[];
 
 for "_i" from 0 to (count TownMarkers - 1) do {
 
 	// Sort out markers
-	_newMarker = createMarker[(TownMarkers select _i),position (TownFlags select _i)];
+	_newMarker = createMarker[(TownMarkers select _i), position (TownFlags select _i)];
 	_newMarker setMarkerText format["%1: 0/%2",TownNames select _i,count (TownTurrets select _i)];
 	_newMarker setMarkerType "mil_flag";
-	_newMarker setMarkerColor "colorKhaki";
+	_newMarker setMarkerColor "colorWhite";
 	
 	(TownFlags select _i) setVectorDir [0,0,0];
-	
-	// Add TownSizesSqr
-	TownSizesSqr = TownSizesSqr + [(TownSizes select _i) * (TownSizes select _i)];
-	
+		
 	// Create the turret holder
 	_flagPos = position (TownFlags select _i);
 	_tHolder = "Land_InfoStand_V2_F" createVehicle _flagPos;
@@ -47,7 +45,6 @@ for "_i" from 0 to (count TownMarkers - 1) do {
 	// Find the town's primary helipad
 	
 	_townHelipad = nearestObject[_flagPos,"HeliH"];
-	TownHelipads set [_i,_townHelipad];
 
 	
 	_emptyUnits = [];
@@ -55,9 +52,15 @@ for "_i" from 0 to (count TownMarkers - 1) do {
 		_emptyUnits = _emptyUnits + [objNull];
 	};
 	
-	TownTHolders set[_i,_tHolder];
-	TownTurrets set[_i,_turrets];
-	TownUnits set[_i,_emptyUnits];
+	// Find the town's primary helipad
+	_townHelipad = nearestObject[_flagPos,"HeliH"];
+
+	
+	TownTHolders = TownTHolders + [_tHolder];
+	TownTurrets = TownTurrets + [_turrets];
+	TownUnits = TownUnits + [_emptyUnits];
+	TownHelipads = TownHelipads + [_townHelipad];
+	TownGroups = TownGroups + [grpNull];
 	_newMarker setMarkerText format["%1: 0/%2",TownNames select _i,count (TownTurrets select _i)];
 };
 

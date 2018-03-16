@@ -16,6 +16,10 @@ FNC_AITroopLanding = compileFinal preprocessFile "Server\AITroopLanding.sqf";
 FNC_AILandAtBase = compileFinal preprocessFile "Server\AILandAtBase.sqf";
 FNC_CreateConvoy = compileFinal preprocessFile "Server\CreateConvoy.sqf";
 FNC_UpdateConvoyWaypoint = compileFinal preprocessFile "Server\UpdateConvoyWaypoint.sqf";
+FNC_UpdateSlingWaypoint = compileFinal preprocessFile "Server\UpdateSlingWaypoint.sqf";
+FNC_DelayedWheelRepair = compileFinal preprocessFile "Server\DelayedWheelRepair.sqf";
+FNC_AddAssistMember = compileFinal preprocessFile "Server\AddAssistMember.sqf";
+FNC_RemoveAfterMinute = compileFinal preprocessFile "Server\RemoveAfterMinute.sqf";
 
 
 
@@ -47,7 +51,7 @@ FNC_UpdateConvoyWaypoint = compileFinal preprocessFile "Server\UpdateConvoyWaypo
 	
 	// Add EventHandlers for AI respawn
 	if (!(isPlayer _x)) then {
-		_x addEventHandler ["Respawn","(_this select 0) spawn FNC_AIRespawn"];
+		_x addEventHandler ["Respawn","(_this select 0) spawn FNC_AIWRespawn"];
 		_x addEventHandler ["Killed","_this call FNC_EntityKilled"];
 		[_x,"FNC_EnemyFromServer",true,false,false] call BIS_fnc_MP;
 	};
@@ -60,11 +64,27 @@ FNC_UpdateConvoyWaypoint = compileFinal preprocessFile "Server\UpdateConvoyWaypo
 BluforIncome = 0;
 OpforIncome = 0;
 
-// Passive Vehicles
+// Passive Vehicle Convoys
 //=========================================
 
 Blufor_Convoy_Groups = [grpNull, grpNull, grpNull];
 Opfor_Convoy_Groups = [grpNull, grpNull, grpNull];
+
+// Create markers for convoys
+for "_i" from 0 to (count Blufor_Convoy_Groups - 1) do {
+	_newMarkerName = format["blufor_convoy_marker_%1",_i];
+	_newMarker = createMarker[_newMarkerName, [0,0,0]];
+	_newMarker setMarkerType "mil_dot";
+	_newMarker setMarkerColor "colorBLUFOR";
+	_newMarker setMarkerAlpha 0;
+};
+for "_i" from 0 to (count Opfor_Convoy_Groups - 1) do {
+	_newMarkerName = format["opfor_convoy_marker_%1",_i];
+	_newMarker = createMarker[_newMarkerName, [0,0,0]];
+	_newMarker setMarkerType "mil_dot";
+	_newMarker setMarkerColor "colorOPFOR";
+	_newMarker setMarkerAlpha 0;
+};
 
 
 // Run scripts
@@ -85,10 +105,7 @@ Opfor_Convoy_Groups = [grpNull, grpNull, grpNull];
 // Plans
 //=========================================
 
-// Make aircraft service deal with sling cars
+// Specific bounty for specific vehicles and helicopters
 
-// Implement waypoints for sling vehicles
-
-
-
+// Independent occupied towns
 

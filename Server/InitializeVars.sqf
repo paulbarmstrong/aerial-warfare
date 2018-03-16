@@ -2,7 +2,8 @@ disableSerialization;
 
 BLUFOR_DEFAULT_RIFLEMAN = "B_Soldier_F";
 
-BLUFOR_CONVOY_VEHICLES = ["B_MRAP_01_gmg_F",			"B_MRAP_01_F",		"B_MRAP_01_hmg_F"];
+BLUFOR_CONVOY_VEHICLES = ["B_MRAP_01_hmg_F",			"B_MRAP_01_gmg_F",		"B_MRAP_01_hmg_F"];
+//BLUFOR_CONVOY_VEHICLES = ["B_G_Offroad_01_armed_F"];
 
 BLUFOR_SLINGABLES = [		"",	"B_G_Offroad_01_armed_F",	"B_MRAP_01_hmg_F",	"B_MRAP_01_gmg_F"];
 BLUFOR_SLINGABLE_PRICES = [	0,			250,						500,				500];
@@ -10,12 +11,14 @@ BLUFOR_SLINGABLE_PRICES = [	0,			250,						500,				500];
 
 OPFOR_DEFAULT_RIFLEMAN = "O_Soldier_F";
 
-OPFOR_CONVOY_VEHICLES = ["O_MRAP_02_gmg_F", "O_MRAP_02_F", "O_MRAP_02_hmg_F"];
+OPFOR_CONVOY_VEHICLES = ["O_MRAP_02_hmg_F", "O_MRAP_02_gmg_F", "O_MRAP_02_hmg_F"];
 
 OPFOR_SLINGABLES = [		"",		"O_G_Offroad_01_armed_F",	"O_MRAP_02_hmg_F",	"O_MRAP_02_gmg_F"];
 OPFOR_SLINGABLE_PRICES = [	0,		250,						500,				500];
 
-
+TEX_REPLACE_CLASSNAMES = [	"O_Heli_Light_02_unarmed_F"];
+TEX_REPLACE_INDICES = [		0];
+TEX_REPLACE_TEXTURES = [	"a3\air_f\heli_light_02\data\heli_light_02_ext_opfor_co.paa"];
 
 
 _name = [];
@@ -126,7 +129,7 @@ _armaPrice = _armaPrice + [[					0,									0]];
 _armaManualFire = _armaManualFire + [[			false,								false]];
 _armaPylonClasses = _armaPylonClasses + [[		[],									[]]];
 _armaPylonIsGunner = _armaPylonIsGunner + [[	[],									[]]];
-_slingNum = _slingNum + [[						0,									2]];
+_slingNum = _slingNum + [[						0,									3]];
 
 
 _name = _name + ["Mi-48 Kajman"];
@@ -137,7 +140,7 @@ _armaPrice = _armaPrice + [[					0,										1000]];
 _armaManualFire = _armaManualFire + [[			true,									true]];
 _armaPylonClasses = _armaPylonClasses + [[		[],										["","PylonRack_19Rnd_Rocket_Skyfire","PylonRack_19Rnd_Rocket_Skyfire",""]]];
 _armaPylonIsGunner = _armaPylonIsGunner + [[	[],										[true,true,true,true]]];
-_slingNum = _slingNum + [[						1,										1]];
+_slingNum = _slingNum + [[						0,										0]];
 
 
 _name = _name + ["Y-32 Xi'an"];

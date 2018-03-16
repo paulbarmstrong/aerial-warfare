@@ -56,7 +56,7 @@ if (_heliIndex > -1 && _armaIndex > -1 && _slingIndex > -1) then {
 		_spawnSpot = _helipads select 0;
 		_bestHeliDistance = 0;
 		{
-			_nearestHeli = nearestObject[position _x,"Helicopter"];
+			_nearestHeli = nearestObject[position _x,"AllVehicles"];
 			if (_nearestHeli isEqualTo objNull || {_nearestHeli distance2D _x > _bestHeliDistance}) then {
 				_spawnSpot = _x;
 				if (!(_nearestHeli isEqualTo objNull)) then {
@@ -103,9 +103,20 @@ if (_heliIndex > -1 && _armaIndex > -1 && _slingIndex > -1) then {
 		};
 		
 		// Set position/rotation explicitly
-		_heli setPos (position _spawnSpot);
+		if (_slingIndex > 0) then {
+			_heli setPos ((position _spawnSpot) vectorAdd [0,0,10]);
+		} else {
+			_heli setPos (position _spawnSpot);
+		};
 		_heli setDir (direction _spawnSpot);
 		_heli action ["LandGear", _heli];
+		
+		// Replace heli texture if applicable
+		_texNum = TEX_REPLACE_CLASSNAMES find _heliClassname;
+		if (_texNum > -1) then {
+			_heli setObjectTexture [TEX_REPLACE_INDICES select _texNum, TEX_REPLACE_TEXTURES select _texNum];
+		};
+		
 		
 		// Create the crew (copilot, gunners...) and remove the pilot
 		_heliGroup = createGroup [side group player,true];
@@ -123,8 +134,8 @@ if (_heliIndex > -1 && _armaIndex > -1 && _slingIndex > -1) then {
 		_heli lock true;
 		player hideObject false;
 		player allowDamage false;
-		_heli addEventHandler ["Killed","{_x setDamage 1} forEach crew vehicle player; player setDamage 1;"];
-		_heli addEventHandler ["Hit","(vehicle player) call FNC_KeepEngineAlive;"];
+		_heli addEventHandler ["Killed","{_x allowDamage true;} forEach crew vehicle player;"];
+		_heli addEventHandler ["Hit","(_this select 0) spawn FNC_KeepEngineAlive;"];
 
 
 		// Create the men in cargo (troops to capture bases, set up mortar...)
@@ -146,7 +157,11 @@ if (_heliIndex > -1 && _armaIndex > -1 && _slingIndex > -1) then {
 				[_x] joinSilent _heliGroup;
 			};
 		} forEach (crew _heli);
-		_heli addEventHandler ["Killed","_this call FNC_EntityKilled"];
+		_heli addEventHandler ["RopeBreak", "_this call FNC_UpdateSlingWaypoint"];
+		_heli addEventHandler ["Killed", "_this call FNC_EntityKilled"];
+		_heli addEventHandler ["Hit","_this call FNC_AddAssistMember"];
+		_heli setVariable ["listOfAssists",[]];
+		_heli setVariable ["owner", player];
 		[_heli,"FNC_EnemyFromServer",true,false,false] call BIS_fnc_MP;
 		
 		_heliGroup setBehaviour "CARELESS";
@@ -156,13 +171,9 @@ if (_heliIndex > -1 && _armaIndex > -1 && _slingIndex > -1) then {
 			_heli action ["ManualFire",_heli];
 		};
 		
-	//	hint format["%1",[(configFile >> "CfgVehicles" >> "B_HMG_01_high_F"),true ] call BIS_fnc_returnParents];
-	//	copyToClipboard format["%1",_heli getCompatiblePylonMagazines 1];
-	
+		// Add the sling load
 		if (_slingIndex > 0) then {
 		
-			// Elevate the heli
-			_heli setPos ((position _spawnSpot) vectorAdd [0,0,10]);
 		
 			// Create the sling load
 			_vehGroup = createGroup [side group player , true];
@@ -180,19 +191,27 @@ if (_heliIndex > -1 && _armaIndex > -1 && _slingIndex > -1) then {
 			
 			// Do Event handlers
 			{
+				_x addEventHandler ["GetOutMan", "(_this select 0) spawn FNC_RemoveAfterMinute;"];
 				_x addEventHandler ["Killed","_this call FNC_EntityKilled"];
 				[_x,"FNC_EnemyFromServer",true,false,false] call BIS_fnc_MP;
 				_x setVariable ["owner", player];
 			} forEach _fullCrew;
+			_veh addEventHandler ["Hit","(_this select 0) spawn FNC_DelayedWheelRepair;"];
 			_veh addEventHandler ["Killed","_this call FNC_EntityKilled"];
+			_veh addEventHandler ["Hit","_this call FNC_AddAssistMember"];
+			_veh setVariable ["listOfAssists",[]];
+			_veh setVariable ["owner", player];
 			[_veh,"FNC_EnemyFromServer",true,false,false] call BIS_fnc_MP;
 		
 		};
-
 		
 		// Announce to the server that the player has pulled the heli
 		_genericHeliName = getText(configFile >> "CfgVehicles" >> (typeOf _heli) >> "displayName");
-		player groupChat format["Purchased %2 and armaments | -$%1",_totalPrice,_genericHeliName];
+		player groupChat format["Purchased %2 and armaments | -$%1",_totalPrice - (_slingPrices select _slingIndex),_genericHeliName];
+		if (_slingIndex > 0) then {
+			_genericVehName = getText(configFile >> "CfgVehicles" >> (_slingables select _slingIndex) >> "displayName");
+			player groupChat format["Purchased %2 | -$%1",(_slingPrices select _slingIndex),_genericVehName];
+		};
 		player globalChat format["%1[%2] spawned",name player,_genericHeliName];
 		
 		uiNamespace setVariable ["aircraftSelection",_heliIndex];
@@ -200,9 +219,16 @@ if (_heliIndex > -1 && _armaIndex > -1 && _slingIndex > -1) then {
 		uiNamespace setVariable ["hasSetSelection",false];
 		sleep _delayBeforeService;
 		uiNamespace setVariable ["repairState",0];
+		//copyToClipboard str getObjectTextures _heli;
 	} else {
 		hint "You do not have enough money to purchase this combination!";
 	};
 } else {
 	hint "Invalid Combination";
 };
+
+
+
+	//	hint format["%1",[(configFile >> "CfgVehicles" >> "B_HMG_01_high_F"),true ] call BIS_fnc_returnParents];
+	//	copyToClipboard format["%1",_heli getCompatiblePylonMagazines 1];
+	

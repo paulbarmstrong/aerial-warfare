@@ -4,7 +4,7 @@ _group = group _this;
 _heli = vehicle _this;
 
 // Use this flag to avoid duplicate calls from the WaypointStatements
-if (!(_group getVariable "lettingOutTroops") && !(_group getVariable "landingAtBase")) then {
+if ((playableUnits find _this > -1) && !(_group getVariable "lettingOutTroops") && !(_group getVariable "landingAtBase")) then {
 	_group setVariable ["lettingOutTroops", true];
 
 	_homePos = getMarkerPos "respawn_west";

@@ -40,7 +40,7 @@ for "_i" from 0 to (count TownMarkers - 1) do {
 
 
 // Set waypoint to town
-_moveWaypoint = _group addWaypoint[TownFlags select _bestIndex, 0];
+_moveWaypoint = _group addWaypoint[TownFlags select _bestIndex, 20];
 _moveWaypoint setWaypointType "LOITER";
 
 // Set behavior
