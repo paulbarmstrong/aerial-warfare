@@ -30,3 +30,12 @@ A recent update to Arma 3 prompted the devs to refine the aircraft systems and a
 
 By now I have a good understanding of the SQF language and what is and isn't possible with the current arma 3 API. I think that with the game in its current state, I shouldn't run into any more major barriers while finishing this project.
 
+## Plans
+
+*Create a script to allow any airplane to perform a tailhook landing on the carrier
+*Create versions for takistan and chernarus and use hard links to link all scripts
+
+## Bugs
+
+*There is some something causing the log to be spammed with message about destroy and it has something to do with playableAI behavior
+*Sometimes LZ gets cleared, shows 0/4, white, no men there, but cannot be captured (caused by network latency?)
