@@ -6,12 +6,7 @@ _heli = vehicle _this;
 // Use this flag to avoid duplicate calls from the WaypointStatements
 if ((playableUnits find _this > -1) && !(_group getVariable "lettingOutTroops") && !(_group getVariable "landingAtBase")) then {
 	_group setVariable ["lettingOutTroops", true];
-
-	_homePos = getMarkerPos "respawn_west";
-	if (side _this == east) then {
-		_homePos = getMarkerPos "respawn_east";
-	};
-
+	
 	_heli land "LAND";
 
 	_closestTown = 0;
@@ -21,14 +16,27 @@ if ((playableUnits find _this > -1) && !(_group getVariable "lettingOutTroops") 
 		};
 	};
 
+	// If there are hostiles at this town, target them and make an effort to kill them
+	if (side (TownGroups select _closestTown) != (side _group) && {(TownUnitCounts select _closestTown) > 0}) then {
+		
+		// Add waypoints to destroy all enemies there
+		/*
+		{
+			if (!(_x isEqualTo objNull)) then {
+				_newWaypoint = _group addWaypoint[_x,0];
+				_newWaypoint setWaypointType "DESTROY";
+			};
+		} forEach (units (TownGroups select _closestTown)); */
+		
+	};
+		
 	_timePassed = 0;
-
 	while {!isTouchingGround _heli && _timePassed < 45} do {
 		sleep 1;
 		_timePassed = _timePassed + 1;
 	};
 
-	if (isTouchingGround _heli) then {
+	if (isTouchingGround _heli && {(TownGroups select _closestTown) isEqualTo grpNull || (side (TownGroups select _closestTown)) == (side _group)}) then {
 
 
 		// Get an array of all cargo crew
@@ -56,12 +64,24 @@ if ((playableUnits find _this > -1) && !(_group getVariable "lettingOutTroops") 
 			};
 			if (_turretSlotIndex < count _turrets) then {
 				_man = _cargoCrew select _heliManIndex;
+				_units set[_turretSlotIndex,_man];
 				unassignVehicle _man;
-				_man action ["eject",vehicle _man];
+				
+				if ((TownGroups select _closestTown) isEqualTo grpNull || {count units (TownGroups select _closestTown) == 0}) then {
+					_newGroup = createGroup [side _man, true];
+					_newGroup setCombatMode "RED";
+					_newGroup setGroupOwner 2;
+					TownGroups set [_closestTown,_newGroup];
+				};
+				
+				[_man] join (TownGroups select _closestTown);
+				
+				_man action ["eject", vehicle _man];
 				
 				_man assignAsGunner (_turrets select _turretSlotIndex);
-				[_man] orderGetIn true;		
-				_units set[_turretSlotIndex,_man];
+				[_man] orderGetIn true;
+								
+				[leader _group, TROOP_LANDING_AWARD] remoteExec ["FNC_ChangeMoney", 2, false];
 				
 				sleep 1.25;
 			};
@@ -72,7 +92,7 @@ if ((playableUnits find _this > -1) && !(_group getVariable "lettingOutTroops") 
 	if (alive _heli) then {
 		_heli land "NONE";
 		_group setVariable ["lettingOutTroops", false];
-		_group call FNC_UpdateWaypoint;
+		_group spawn FNC_UpdateWaypoint;
 	};
 };
 

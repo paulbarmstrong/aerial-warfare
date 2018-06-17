@@ -4,31 +4,44 @@
 FNC_EntityKilled = compileFinal preprocessFile "Server\EntityKilled.sqf";
 FNC_AIRespawn = compileFinal preprocessFile "Server\AIRespawn.sqf";
 FNC_ServerLoop = compileFinal preprocessFile "Server\ServerLoop.sqf";
-FNC_PayIncome = compileFinal preprocessFile "Server\PayIncome.sqf";
-FNC_CalculateIncome = compileFinal preprocessFile "Server\CalculateIncome.sqf";
 FNC_TrackOnMap = compileFinal preprocessFile "Server\TrackOnMap.sqf";
 FNC_InitializeVars = compileFinal preprocessFile "Server\InitializeVars.sqf";
 FNC_SetUpTowns = compileFinal preprocessFile "Server\SetUpTowns.sqf";
-FNC_DetectTownLoss = compileFinal preprocessFile "Server\DetectTownLoss.sqf";
 FNC_ManEnteredTurret = compileFinal preprocessFile "Server\ManEnteredTurret.sqf";
 FNC_UpdateWaypoint = compileFinal preprocessFile "Server\UpdateWaypoint.sqf";
 FNC_AITroopLanding = compileFinal preprocessFile "Server\AITroopLanding.sqf";
 FNC_AILandAtBase = compileFinal preprocessFile "Server\AILandAtBase.sqf";
 FNC_CreateConvoy = compileFinal preprocessFile "Server\CreateConvoy.sqf";
 FNC_UpdateConvoyWaypoint = compileFinal preprocessFile "Server\UpdateConvoyWaypoint.sqf";
-FNC_UpdateSlingWaypoint = compileFinal preprocessFile "Server\UpdateSlingWaypoint.sqf";
 FNC_DelayedWheelRepair = compileFinal preprocessFile "Server\DelayedWheelRepair.sqf";
+FNC_KeepEngineAlive = compileFinal preprocessFile "Server\KeepEngineAlive.sqf";
 FNC_AddAssistMember = compileFinal preprocessFile "Server\AddAssistMember.sqf";
 FNC_RemoveAfterMinute = compileFinal preprocessFile "Server\RemoveAfterMinute.sqf";
+FNC_GetOutPunish = compileFinal preprocessFile "Server\GetOutPunish.sqf";
+FNC_UpdateIncomes = compileFinal preprocessFile "Server\UpdateIncomes.sqf";
+FNC_VehicleKilled = compileFinal preprocessFile "Server\VehicleKilled.sqf";
+FNC_TrackExplosive = compileFinal preprocessFile "Server\TrackExplosive.sqf";
+FNC_SpawnPlayerAircraft = compileFinal preprocessFile "Server\SpawnPlayerAircraft.sqf";
+FNC_ChangeMoney = compileFinal preprocessFile "Server\ChangeMoney.sqf";
+FNC_LetTroopsOut = compileFinal preprocessFile "Server\LetTroopsOut.sqf";
+FNC_DropTroops = compileFinal preprocessFile "Server\DropTroops.sqf";
+FNC_DistributeHitmarkers = compileFinal preprocessFile "Server\DistributeHitmarkers.sqf";
+FNC_DeathMessage = compileFinal preprocessFile "Server\DeathMessage.sqf";
+FNC_PutOriginalTownMen = compileFinal preprocessFile "Server\PutOriginalTownMen.sqf";
+
+FNC_PlayerAndCrewLocal = compileFinal preprocessFile "Client\PlayerAndCrewLocal.sqf";
 
 
-
-// Quickly Initialize some global variables:
-[] call FNC_InitializeVars;
-
-// Initialize town stuff
 //=========================================
+// Disable saving:
 
+enableSaving [false, false];
+
+
+//=========================================
+// Initialize global variables and towns:
+
+[] call FNC_InitializeVars;
 [] call FNC_SetUpTowns;
 
 // Initialize playable AI stuff
@@ -38,8 +51,8 @@ FNC_RemoveAfterMinute = compileFinal preprocessFile "Server\RemoveAfterMinute.sq
 	// Create markers for all playable units
 	_side = side _x;
 	_groupID = groupID (group _x);
-	_newMarkerName = format["%1_%2_marker",_side,_groupID];
-	_newMarker = createMarker[_newMarkerName,position _x];
+	_newMarkerName = format["%1_%2_marker", _side, _groupID];
+	_newMarker = createMarker[_newMarkerName, position _x];
 	_newMarker setMarkerType "mil_dot";
 	if (isPlayer _x) then {
 		_newMarker setMarkerText (name player);
@@ -47,28 +60,44 @@ FNC_RemoveAfterMinute = compileFinal preprocessFile "Server\RemoveAfterMinute.sq
 		_newMarker setMarkerText _groupID;
 	};
 	if (_side == west) then { _newMarker setMarkerColor "colorBLUFOR"; } else { _newMarker setMarkerColor "colorOPFOR"; };
-	//_newMarker setMarkerColor "colorUNKNOWN";
 	
 	// Add EventHandlers for AI respawn
-	if (!(isPlayer _x)) then {
-		_x addEventHandler ["Respawn","(_this select 0) spawn FNC_AIWRespawn"];
-		_x addEventHandler ["Killed","_this call FNC_EntityKilled"];
-		[_x,"FNC_EnemyFromServer",true,false,false] call BIS_fnc_MP;
+	_x addEventHandler ["Respawn","(_this select 0) spawn FNC_AIRespawn;"];
+	_x addEventHandler ["Killed","_this spawn FNC_EntityKilled; _this spawn FNC_DeathMessage;"];
+	_x addEventHandler ["Hit", FNC_DistributeHitmarkers];
+	(group _x) setVariable["Money", "StartingMoney" call BIS_fnc_getParamValue, true];
+	if (name _x == "PULL") then {
+		(group _x) setVariable["Money", 200000, true];
 	};
+	
+	// Make flag to prevent duplicate AIRespawns
+	(group _x) setVariable ["warfare_need_spawn", true];
+		
+	// Make the LastPosition to deal with ai getting stuck
+	_x setVariable ["LastPosition", position _x];
+	
 } forEach playableUnits;
 
 
 // Initialize income/economy stuff
 //=========================================
 
-BluforIncome = 0;
-OpforIncome = 0;
+BluforIncome = MINIMUM_INCOME;
+OpforIncome = MINIMUM_INCOME;
+publicVariable "BluforIncome";
+publicVariable "OpforIncome";
 
 // Passive Vehicle Convoys
 //=========================================
 
-Blufor_Convoy_Groups = [grpNull, grpNull, grpNull];
-Opfor_Convoy_Groups = [grpNull, grpNull, grpNull];
+Blufor_Convoy_Groups = [];
+Opfor_Convoy_Groups = [];
+
+for "_i" from 0 to (("NumConvoys" call BIS_fnc_getParamValue) - 1) do {
+	Blufor_Convoy_Groups = Blufor_Convoy_Groups + [grpNull];
+	Opfor_Convoy_Groups = Opfor_Convoy_Groups + [grpNull];
+};
+
 
 // Create markers for convoys
 for "_i" from 0 to (count Blufor_Convoy_Groups - 1) do {
@@ -86,26 +115,36 @@ for "_i" from 0 to (count Opfor_Convoy_Groups - 1) do {
 	_newMarker setMarkerAlpha 0;
 };
 
+// Define behavior for when a player disconnects
+
 
 // Run scripts
 //=========================================
 
+BluforIsSpawning = false;
+OpforIsSpawning = false;
+
 [] spawn FNC_ServerLoop;
-[] spawn FNC_PayIncome;
 
 {
-	if (!(isPlayer _x)) then
-	{
-		_x spawn FNC_AIRespawn;
-	};
+	_x spawn FNC_AIRespawn;
 } forEach playableUnits;
 
 
+// Mission Event Handlers
+//=========================================
+
+addMissionEventHandler ["PlayerDisconnected", {
+	BluforIsSpawning = false;
+	OpforIsSpawning = false;
+}];
 
 // Plans
 //=========================================
 
-// Specific bounty for specific vehicles and helicopters
+// There is some something causing the log to be spammed with message about destroy
+// and it has something to do with playableAI behavior
 
-// Independent occupied towns
+// Sometimes LZ gets cleared, shows 0/4, white, no men there, but cannot be captured
+
 

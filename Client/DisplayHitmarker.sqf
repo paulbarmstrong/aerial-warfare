@@ -1,4 +1,7 @@
+disableSerialization;
+
 _pic = "Images\goodhitmarker.paa";
+
 [
     '<img size=''1'' shadow=''0'' image='+(str(_pic))+' />', //align=''center''
 	-1,

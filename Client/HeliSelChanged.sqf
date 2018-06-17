@@ -30,7 +30,7 @@ if (_chosenHeli != "") then {
 		_currentIndex = _armaList lbAdd format["%1 ($%2)",_specificArmaNames select _i,_specificArmaPrices select _i];
 	};
 	if (!(uiNameSpace getVariable "hasSetSelection")) then {
-		_armaList lbSetCurSel (uiNameSpace getVariable "aircraftSelection");
+		_armaList lbSetCurSel (uiNameSpace getVariable "armamentSelection");
 		uiNameSpace setVariable ["hasSetSelection",true];
 	} else {
 		_armaList lbSetCurSel 0;

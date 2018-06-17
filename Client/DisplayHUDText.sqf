@@ -2,6 +2,13 @@ disableSerialization;
 
 // Draw the money UI
 _money = (group player) getVariable "Money";
+_income = 0;
+if (side group player == west) then {
+	_income = BluforIncome;
+} else {
+	_income = OpforIncome;
+};
+
 _numCapMen = 0;
 {
 	if ((_x getVariable "SoldierType") == "capture" && alive _x) then {
@@ -9,11 +16,9 @@ _numCapMen = 0;
 	};
 } forEach crew vehicle player;
 
-_string = format["<t align='left'>Money: $%1<br />Troops: %2</t>",_money,_numCapMen];
+_string = format["<t align='left'>Money: $%1 (+$%2/min)<br />Troops: %3</t>",_money,_income,_numCapMen];
 
 [
-	//'<t size=''1'' shadow=''0'' />+(_string)+<\t>',
-	//'<t size=''1'' shadow=''0'' text=_string />',
 	_string,
 	safeZoneX,
 	0,
@@ -21,7 +26,7 @@ _string = format["<t align='left'>Money: $%1<br />Troops: %2</t>",_money,_numCap
 	0,
 	0,
 	8364
-] spawn bis_fnc_dynamicText;
+] spawn BIS_fnc_dynamicText;
 
 
 

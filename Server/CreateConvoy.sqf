@@ -35,21 +35,20 @@ for "_i" from 0 to (count _vehList - 1) do {
 	_veh enableRopeAttach false;
 	
 	// Offset newVehPos for the next vehicle
-	_newVehPos = [_newVehPos,10, _newVehDir+180] call BIS_fnc_relPos;
-
+	_newVehPos = [_newVehPos, 20, _newVehDir + 180] call BIS_fnc_relPos;
 	
 	// Apply Event handlers
 	{
 		_x addEventHandler ["GetOutMan", "(_this select 0) spawn FNC_RemoveAfterMinute;"];
 		_x addEventHandler ["Killed","_this call FNC_EntityKilled"];
-		[_x,"FNC_EnemyFromServer",true,false,false] call BIS_fnc_MP;
+		_x addEventHandler ["Hit", FNC_DistributeHitmarkers];
 	} forEach _fullCrew;
 	_veh addEventHandler ["Hit","(_this select 0) spawn FNC_DelayedWheelRepair;"];
 	_veh addEventHandler ["Killed","_this call FNC_EntityKilled"];
 	_veh addEventHandler ["Hit","_this call FNC_AddAssistMember"];
 	_veh setVariable ["listOfAssists",[]];
-	[_veh,"FNC_EnemyFromServer",true,false,false] call BIS_fnc_MP;
-
+	_veh addEventHandler ["Hit", FNC_DistributeHitmarkers];
+	_veh limitSpeed 60;
 };
 
 // Give the initial waypoint

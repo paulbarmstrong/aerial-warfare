@@ -25,19 +25,23 @@ _armaList = (findDisplay 8366) displayCtrl 1300;
 _armaIndex = lbCurSel _armaList;
 _chosenArma = _armaList lbText _armaIndex;
 
-_slingList = (findDisplay 8366) displayCtrl 1400;
-_slingNum = (_slingNums select _heliIndex) select _armaIndex;
-
 if (_chosenArma != "") then {
+	
+	_slingList = (findDisplay 8366) displayCtrl 1400;
+	_slingNum = (_slingNums select _heliIndex) select _armaIndex;
 	
 	// Reset and repopulate the list
 	lbClear _slingList;
 	for "_i" from 0 to _slingNum do {
-		_displayName = "Empty";
+		_displayName = "None";
 		if (!((_slingables select _i) isEqualTo "")) then {
 			_displayName = getText(configFile >> "CfgVehicles" >> (_slingables select _i) >> "displayName");
 		};
-		_currentIndex = _slingList lbAdd format["%1 ($%2)",_displayName, _slingPrices select _i];
+		_specialAAIndex = SPECIAL_AA_SLINGABLES find (_slingables select _i);
+		if (_specialAAIndex > -1) then {
+			_displayName = SPECIAL_AA_SLING_NAMES select _specialAAIndex;
+		};
+		_currentIndex = _slingList lbAdd format["%1 ($%2)", _displayName, _slingPrices select _i];
 	};
 	_slingList lbSetCurSel 0;
 	

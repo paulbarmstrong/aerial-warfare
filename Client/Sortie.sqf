@@ -1,33 +1,36 @@
 disableSerialization;
 
 _helipads = BluforHelipads;
+_unitSpawnPos = bluforSpawnPos;
 _heliNames = BLUFOR_HELI_NAMES;
 _heliPrices = BLUFOR_HELI_PRICES;
 _slingables = BLUFOR_SLINGABLES;
 _slingPrices = BLUFOR_SLINGABLE_PRICES;
 if (side player == east) then {
 	_helipads = OpforHelipads;
+	_unitSpawnPos = opforSpawnPos;
 	_heliNames = OPFOR_HELI_NAMES;
 	_heliPrices = OPFOR_HELI_PRICES;
 	_slingables = OPFOR_SLINGABLES;
 	_slingPrices = OPFOR_SLINGABLE_PRICES;
 };
 
+uiNameSpace setVariable ["trying_to_spawn", false];
 player setDamage 0;
 removeAllActions player;
 removeAllWeapons player;
+_crew = crew (vehicle player);
 {
-	_xUnit = _x select 0;
-	if (!isPlayer _xUnit) then {
-		deleteVehicle _xUnit;
+	if (!isPlayer _x) then {
+		deleteVehicle _x;
 	};
-} forEach (fullCrew (vehicle player));
+} forEach _crew;
 
 if (str ((vehicle player) getVariable "price") != "") then {
 	
 	// Apply reimbursement for the aircraft
 	_reimbursement = (vehicle player) getVariable "price";
-	group player setVariable["Money",(group player getVariable "Money") + _reimbursement];
+	[player, _reimbursement] remoteExec ["FNC_ChangeMoney", 2, false];
 	_genericHeliName = getText(configFile >> "CfgVehicles" >> (typeOf vehicle player) >> "displayName");
 	player groupChat format["Aircraft refunded | +$%1",_reimbursement,_genericHeliName];
 	
@@ -47,6 +50,11 @@ if (str ((vehicle player) getVariable "price") != "") then {
 	if (_slingValue > 0) then {
 		group player setVariable["Money",(group player getVariable "Money") + _slingValue];
 		_genericSlingName = getText(configFile >> "CfgVehicles" >> (typeOf _slingLoad) >> "displayName");
+		_specialAAIndex = SPECIAL_AA_SLINGABLES find (typeOf _slingLoad);
+		if (_specialAAIndex > -1) then {
+			_genericSlingName = SPECIAL_AA_SLING_NAMES select _specialAAIndex;
+		};
+		
 		player groupChat format["%1 refunded | +$%2", _genericSlingName, _slingValue];
 		{
 			deleteVehicle (_x select 0);
@@ -55,9 +63,11 @@ if (str ((vehicle player) getVariable "price") != "") then {
 	
 	deleteVehicle _slingLoad;
 };
-deleteVehicle (vehicle player);
+if (vehicle player != player ) then {
+	deleteVehicle (vehicle player);
+};
 
-_nearestHelipad = _heliPads select 0;
+_nearestHelipad = _helipads select 0;
 {
 	if (player distance2D _x < player distance2D _nearestHelipad) then {
 		_nearestHelipad = _x;
@@ -65,8 +75,10 @@ _nearestHelipad = _heliPads select 0;
 } forEach _helipads;
 
 player hideObject true;
-player setPos (position _nearestHelipad);
+player setPosASL (getPosASL _unitSpawnPos);
 player setVelocity [0,0,0];
+
+if (!alive player) exitWith {};
 
 createDialog "Sortie_Dialog";
 
@@ -88,7 +100,7 @@ for "_i" from 0 to (count _heliNames - 1) do {
 };
 
 _heliList lbSetCurSel (uiNameSpace getVariable "aircraftSelection");
-_armaList lbSetCurSel (uiNameSpace getVariable "armaSelection");
+_armaList lbSetCurSel (uiNameSpace getVariable "armamentSelection");
 _spawnButton ctrlSetText format["Spawn in the %1 for $0",_heliNames select 0];
 
 

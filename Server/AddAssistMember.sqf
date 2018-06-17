@@ -3,7 +3,7 @@ disableSerialization;
 _veh = _this select 0;
 _hitterVeh = vehicle (_this select 1);
 
-_assistOwner = _hitterVeh getVariable "owner";
+_assistOwner = leader (_hitterVeh getVariable "warfare_owner");
 if (isPlayer (driver _hitterVeh)) then {
 	_assistOwner = driver _hitterVeh;
 };

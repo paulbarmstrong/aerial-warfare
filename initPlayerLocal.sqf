@@ -1,9 +1,7 @@
 // Function Definitions:
 //=========================================
 
-FNC_PlayerKilled = compileFinal preprocessFile "Client\PlayerKilled.sqf";
 FNC_PlayerRespawn = compileFinal preprocessFile "Client\PlayerRespawn.sqf";
-FNC_EnemyFromServer = compileFinal preprocessFile "Client\EnemyFromServer.sqf";
 FNC_DisplayHitmarker = compileFinal preprocessFile "Client\DisplayHitmarker.sqf";
 FNC_ClientLoop = compileFinal preprocessFile "Client\ClientLoop.sqf";
 FNC_ShowMarker = compileFinal preprocessFile "Client\ShowMarker.sqf";
@@ -16,61 +14,50 @@ FNC_SpawnButtonPressed = compileFinal preprocessFile "Client\SpawnButtonPressed.
 FNC_InventoryOpened = compileFinal preprocessFile "Client\InventoryOpened.sqf";
 FNC_Sortie = compileFinal preprocessFile "Client\Sortie.sqf";
 FNC_DisplayHUDText = compileFinal preprocessFile "Client\DisplayHUDText.sqf";
-FNC_LetTroopsOut = compileFinal preprocessFile "Client\LetTroopsOut.sqf";
-FNC_DropTroops = compileFinal preprocessFile "Client\DropTroops.sqf";
-FNC_InitializeVars = compileFinal preprocessFile "Server\InitializeVars.sqf";
-FNC_EntityKilled = compileFinal preprocessFile "Server\EntityKilled.sqf";
 FNC_RepairUpTo = compileFinal preprocessFile "Client\RepairUpTo.sqf";
-FNC_KeepEngineAlive = compileFinal preprocessFile "Client\KeepEngineAlive.sqf";
 FNC_HelipadService = compileFinal preprocessFile "Client\HelipadService.sqf";
 FNC_SortieDelay = compileFinal preprocessFile "Client\SortieDelay.sqf";
 FNC_GunnerLook = compileFinal preprocessFile "Client\GunnerLook.sqf";
+FNC_UpdateSlingWaypoint = compileFinal preprocessFile "Client\UpdateSlingWaypoint.sqf";
+FNC_SlingRopeAttach = compileFinal preprocessFile "Client\SlingRopeAttach.sqf";
+FNC_DoneUnloadingTroops = {uiNameSpace setVariable ["isUnloadingTroops", false];};
+FNC_PlayerAndCrewLocal = compileFinal preprocessFile "Client\PlayerAndCrewLocal.sqf";
+
+FNC_LetTroopsOut = compileFinal preprocessFile "Server\LetTroopsOut.sqf";
+FNC_DropTroops = compileFinal preprocessFile "Server\DropTroops.sqf";
+FNC_KeepEngineAlive = compileFinal preprocessFile "Server\KeepEngineAlive.sqf";
+FNC_DelayedWheelRepair = compileFinal preprocessFile "Server\DelayedWheelRepair.sqf";
+FNC_InitializeVars = compileFinal preprocessFile "Server\InitializeVars.sqf";
+FNC_EntityKilled = compileFinal preprocessFile "Server\EntityKilled.sqf";
+FNC_AIRespawn = compileFinal preprocessFile "Server\AIRespawn.sqf";
+FNC_SpawnPlayerAircraft = compileFinal preprocessFile "Server\SpawnPlayerAircraft.sqf";
+FNC_ChangeMoney = compileFinal preprocessFile "Server\ChangeMoney.sqf";
 
 
 //=========================================
+// Disable saving:
+
+enableSaving [false, false];
+
+
+//=========================================
+// Initialize variables
 
 [] call FNC_InitializeVars;
 
 uiNamespace setVariable ["repairState",2];
 uiNamespace setVariable ["isUnloadingTroops",false];
 uiNamespace setVariable ["hasSetSelection",false];
+uiNameSpace setVariable ["trying_to_spawn", false];
 uiNamespace setVariable ["aircraftSelection",0];
 uiNamespace setVariable ["armamentSelection",0];
-(group player) setVariable["Money",10000,true];
 
-player addEventHandler ["Killed","[] call FNC_PlayerKilled"];
 player addEventHandler ["Respawn","[] call FNC_PlayerRespawn"];
 player addEventHandler ["InventoryOpened","[] call FNC_InventoryOpened;"];
-
-// Do EnemyFromServer for all units to compensate for "joining late"
-{
-	_x call FNC_EnemyFromServer;
-} forEach allUnits;
 
 //=========================================
 // Marker stuff
 
-_groupID = groupID (group player);
-_newMarkerName = format["%1_%2_marker",side player,_groupID];
-_newMarker = createMarker[_newMarkerName,position player];
-_newMarker setMarkerType "mil_dot";
-_newMarker setMarkerText (name player);
-if (side player == west) then { _newMarker setMarkerColor "colorBLUFOR"; } else { _newMarker setMarkerColor "colorOPFOR"; };
-
-
-
-_bluforMarkers = 	[	"respawn_west"
-					];
-_opforMarkers = 	[	"respawn_east"
-					];
-
-(_bluforMarkers + _opforMarkers) call FNC_HideMarker;
-
-if (side player == west) then {
-	_bluforMarkers call FNC_ShowMarker;
-} else {
-	_opforMarkers call FNC_ShowMarker;
-};
 
 waitUntil {!isNull (findDisplay 46)};
 
@@ -79,7 +66,8 @@ waitUntil {!isNull (findDisplay 46)};
 
 //How to find the categories a classname fits into:
 //
-//hint format["%1",[(configFile >> "CfgVehicles" >> "B_Soldier_F"),true ] call BIS_fnc_returnParents];
+//hint format["%1", [(configFile >> "CfgVehicles" >> "O_static_AA_F"), true] call BIS_fnc_returnParents];
+//hint format["%1", [(configFile >> "CfgWeapons" >> "launch_O_Titan_F"), true] call BIS_fnc_returnParents];
 
 
 //How to get the common name of a thing:

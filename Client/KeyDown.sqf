@@ -2,7 +2,7 @@
 
 if (_this == 1) then {
 
-1 spawn FNC_SortieDelay;
+	1 spawn FNC_SortieDelay;
 
 };
 

@@ -3,3 +3,55 @@ disabledAI = 0;
 #include "defines.hpp"
 #include "dialogs.hpp"
 #include "CfgSounds.hpp"
+
+gameType = CTI;
+onLoadMission = "PULL's Aerial Warfare";
+onLoadName = "PULL's Aerial Warfare";
+author = "PULL";
+
+briefingName = "PULL's Aerial Warfare";
+
+class Params {
+	class UseRHS {
+		title = "Use RHS:"
+		texts[] = {"Yes", "No"};
+		values[] = {1, 0};
+		default = 0;
+	};
+	class InitialOccupation {
+		title = "Initial LZ Occupation:";
+		texts[] = {"All empty", "All INDEPENDENT (Light)", "All INDEPENDENT (Heavy)", "All INDEPENDENT (Trend)"};
+		values[] = {0, 1, 2, 3};
+		default = 0;
+	};
+	class ControlNearbyLZ {
+		title = "Nearby towns occupied by BLUFOR/OPFOR:";
+		texts[] = {"0", "1", "2"};
+		values[] = {0, 1, 2};
+		default = 0;
+	};
+	class NumConvoys {
+		title = "Number of convoys on each side:"
+		texts[] = {"0", "1", "2"};
+		values[] = {0, 1, 2};
+		default = 1;
+	};
+	class IncludeJets {
+		title = "Include jets:";
+		texts[] = {"Yes", "No"};
+		values[] = {1, 0};
+		default = 1;
+	};
+	class StartingMoney {
+		title = "Money at the start of the mission:";
+		texts[] = {"$0", "$1000", "$2500", "$5000", "$10000", "$20000"};
+		values[] = {0, 1000, 2500, 5000, 10000, 20000};
+		default = 5000;
+	};
+	class TroopIncomeFactor {
+		title = "Income per minute per unit at landing zones:";
+		texts[] = {"$10", "$20", "$50"};
+		values[] = {10, 20, 50};
+		default = 20;
+	};
+};

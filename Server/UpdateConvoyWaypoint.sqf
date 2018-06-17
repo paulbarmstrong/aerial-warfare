@@ -17,6 +17,29 @@ while {count (waypoints _group) > 0} do
 	deleteWaypoint ((waypoints _group) select 0);
 };
 
+// Get all vehicles
+_vehicles = [];
+{
+	if (vehicle _x != _x && {_vehicles find (vehicle _x) == -1}) then {
+		_vehicles = _vehicles + [vehicle _x];
+	};
+} forEach units _group;
+
+if (count _vehicles == 0) exitWith {
+	deleteGroup _group;
+};
+
+_newVehPos = getPos (_vehicles select 0);
+_newVehDir = getDir (_vehicles select 0);
+
+// Reset the positions of the vehicles
+for "_i" from 1 to (count _vehicles - 1) do {
+	_newVehPos = [_newVehPos, 20, _newVehDir + 180] call BIS_fnc_relPos;
+	_newVehPos = [_newVehPos, 0, 10] call BIS_fnc_findSafePos;
+	(_vehicles select _i) setPos _newVehPos;
+	(_vehicles select _i) setDir _newVehDir;
+};
+
 // Get closest town which isn't friendly
 _bestIndex = 0;
 _bestFactor = 0;
@@ -43,7 +66,8 @@ for "_i" from 0 to (count TownMarkers - 1) do {
 _moveWaypoint = _group addWaypoint[TownFlags select _bestIndex, 20];
 _moveWaypoint setWaypointType "LOITER";
 
-// Set behavior
+// Set behavior and formation
 _group setBehaviour "SAFE";
+_group setFormation "FILE";
 
 

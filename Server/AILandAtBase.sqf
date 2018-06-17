@@ -8,11 +8,6 @@ _heli = vehicle _man;
 if ((playableUnits find _man > -1) && !(_group getVariable "lettingOutTroops") && !(_group getVariable "landingAtBase")) then {
 	_group setVariable ["landingAtBase", true];
 
-	_homePos = getMarkerPos "respawn_west";
-	if (side _this == east) then {
-		_homePos = getMarkerPos "respawn_east";
-	};
-
 	_heli land "LAND";
 
 	_timePassed = 0;
@@ -22,21 +17,19 @@ if ((playableUnits find _man > -1) && !(_group getVariable "lettingOutTroops") &
 		_timePassed = _timePassed + 1;
 	};
 
-	{
-		_xUnit = _x select 0;
-		if (playableUnits find _xUnit < 0) then {
-			deleteVehicle _xUnit;
-		};
-	} forEach (fullCrew _heli);
+	_man hideObject false;
+	[_man, _heli getVariable "price"] remoteExec ["FNC_ChangeMoney", 2, false];
+	_crew = crew _heli;
 	deleteVehicle _heli;
-
+	{
+		if (playableUnits find _x < 0) then {
+			deleteVehicle _x;
+		};
+	} forEach _crew;
+	
 	_group setVariable ["landingAtBase", false];
 	
-	_man spawn FNC_AIRespawn;
-	
-/*	if (alive _heli) then {
-		_heli land "NONE";
-		_group setVariable ["landingAtBase", false];
-		_group call FNC_UpdateWaypoint;
-	}; */
+	if (alive _man && alive _heli) then {
+		_man spawn FNC_AIRespawn;
+	};
 };
