@@ -32,10 +32,10 @@ By now I have a good understanding of the SQF language and what is and isn't pos
 
 ## Plans
 
-*Create a script to allow any airplane to perform a tailhook landing on the carrier
-*Create versions for takistan and chernarus and use hard links to link all scripts
+* Create a script to allow any airplane to perform a tailhook landing on the carrier
+* Create versions for takistan and chernarus and use hard links to link all scripts
 
 ## Bugs
 
-*There is some something causing the log to be spammed with message about destroy and it has something to do with playableAI behavior
-*Sometimes LZ gets cleared, shows 0/4, white, no men there, but cannot be captured (caused by network latency?)
+* There is some something causing the log to be spammed with message about destroy and it has something to do with playableAI behavior
+* Sometimes LZ gets cleared, shows 0/4, white, no men there, but cannot be captured (caused by network latency?)
