@@ -24,7 +24,7 @@ if (_heliClassname isKindOf "Plane") then {
 };
 
 // Create the aircraft
-_heli = createVehicle [_heliClassname, (getPosASL _spawnSpot) vectorAdd[0, 0, 100], [], 0, _special];
+_heli = createVehicle [_heliClassname, (getPosASL _spawnSpot) vectorAdd [0, 0, _startHeight], [], 0, _special];
 _heli setVariable ["price", _totalPrice - (_slingPrices select _slingIndex)];
 [_heli, ["price", _totalPrice - (_slingPrices select _slingIndex)]] remoteExec ["setVariable", 2, false];
 
@@ -100,6 +100,12 @@ for "_i" from 0 to (_cargoCrewCount - 1) do {
 		deleteVehicle _troop; 
 	};
 };
+
+/*
+// Add the tailhook action if applicable
+if (_heliClassname isKindOf "Plane") then {
+	player addAction ["Lower tailhook", ];
+}; */
 
 // When done, remoteExec setVariable to let the server know
 [player, ["pull_the_heli", _heli]] remoteExec ["setVariable", 2, false];

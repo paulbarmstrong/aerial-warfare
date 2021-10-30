@@ -27,6 +27,9 @@ if (!(isObjectHidden _man) && !(isPlayer _man) && (vehicle _man == _man) && {(To
 		[_man, _veh] remoteExec ["moveInCargo", owner _veh, false];
 		
 	} else {
+		if (playableUnits find _man > -1) then {
+			[_man, -100] remoteExec ["FNC_ChangeMoney", 2, false];
+		};
 		_man allowDamage true;
 		_man setDamage 1;
 	};

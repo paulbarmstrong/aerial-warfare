@@ -62,7 +62,6 @@ if (_heliIndex > -1 && _armaIndex > -1 && _slingIndex > -1) then {
 		
 		_heliClassname = (_armaClassnames select _heliIndex) select _armaIndex;
 		
-		
 		if (_heliClassname isKindOf "Plane") then {
 			sleep 10;
 		} else {

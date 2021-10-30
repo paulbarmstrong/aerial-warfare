@@ -99,19 +99,21 @@ _bestHeliDistance = 0;
 
 // Special spawn location for airplane
 _special = "FLY";
+_startHeight = 12;
 if (_heliClassname isKindOf "Plane") then {
 	_spawnSpot = _jetSpot;
 	_special = "NONE";
+	_startHeight = 0;
 };
 
 // Create the vehicle
-_heli = createVehicle [_heliClassname, getPosASL _spawnSpot, [], 0, _special];
+_heli = createVehicle [_heliClassname, (getPosASL _spawnSpot) vectorAdd [0, 0, _startHeight], [], 0, _special];
 _heli allowDamage false;
 _heli setVariable ["price", _totalPrice];
 
 
 // Set position, rotation explicitly
-_heli setPosASL (getPosASL _spawnSpot);
+_heli setPosASL ((getPosASL _spawnSpot) vectorAdd [0, 0, _startHeight]);
 _heli setDir (direction _spawnSpot);
 
 // Replace heli texture if applicable
@@ -136,6 +138,7 @@ createVehicleCrew _heli;
 
 
 // Move man in, lock them in, and make them visible
+_man assignAsDriver _heli;
 _man moveInDriver _heli;
 
 // Heli lock and lock-related heli eventhandlers
@@ -162,7 +165,9 @@ for "_i" from 0 to (_cargoCrewCount - 1) do {
 {
 	if (_x != _man) then {
 		_x addEventHandler ["Killed", "_this call FNC_EntityKilled"];
-		_x addEventHandler ["Hit", FNC_DistributeHitmarkers];
+		if (USE_HITMARKERS) then {
+			_x addEventHandler ["Hit", FNC_DistributeHitmarkers];
+		};
 		_x setVariable ["warfare_owner", group _man];
 		[_x] joinSilent _group;
 	};
@@ -178,7 +183,9 @@ _heli addEventHandler ["Fired", {
 		_this spawn FNC_TrackExplosive;
 	};
 }];
-_heli addEventHandler ["Hit", FNC_DistributeHitmarkers];
+if (USE_HITMARKERS) then {
+	_heli addEventHandler ["Hit", FNC_DistributeHitmarkers];
+};
 
 _heli setVariable ["death_has_been_handled", false];
 _heli allowCrewInImmobile true;
@@ -205,5 +212,21 @@ if (_side == west) then {
 };
 _man setVariable ["warfare_respawn_lock", false];
 
+/*
 
+_ragdoll = (findDisplay 46) displayAddEventHandler ["KeyUp", {
+	if (_this select 1 == 0x22) then {
+		private "_tripObj";
+		_tripObj = "Land_CanV3_F" createVehicleLocal [0,0,0];
+		_tripObj setMass 300000;
+		_tripObj attachTo [player, [0,0,0], "Spine3"];
+		_tripObj setVelocity [0,0,-20];
+		player allowDamage false;
+		_fnc = _tripObj spawn {
+			deleteVehicle _this;
+			sleep 30;
+			player allowDamage true;
+		};
+	};
+]; */
 

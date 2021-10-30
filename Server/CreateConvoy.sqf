@@ -41,13 +41,17 @@ for "_i" from 0 to (count _vehList - 1) do {
 	{
 		_x addEventHandler ["GetOutMan", "(_this select 0) spawn FNC_RemoveAfterMinute;"];
 		_x addEventHandler ["Killed","_this call FNC_EntityKilled"];
-		_x addEventHandler ["Hit", FNC_DistributeHitmarkers];
+		if (USE_HITMARKERS) then {
+			_x addEventHandler ["Hit", FNC_DistributeHitmarkers];
+		}
 	} forEach _fullCrew;
 	_veh addEventHandler ["Hit","(_this select 0) spawn FNC_DelayedWheelRepair;"];
 	_veh addEventHandler ["Killed","_this call FNC_EntityKilled"];
 	_veh addEventHandler ["Hit","_this call FNC_AddAssistMember"];
 	_veh setVariable ["listOfAssists",[]];
-	_veh addEventHandler ["Hit", FNC_DistributeHitmarkers];
+	if (USE_HITMARKERS) then {
+		_veh addEventHandler ["Hit", FNC_DistributeHitmarkers];
+	};
 	_veh limitSpeed 60;
 };
 

@@ -5,7 +5,7 @@ _shooter = _this select 7;
 _projectile = _this select 6;
 
 _range = 6;
-if (_weapon isKindOf ['LauncherCore', configFile >> 'CfgWeapons']) then {
+if (_weapon isKindOf ["LauncherCore", configFile >> "CfgWeapons"]) then {
 	_range = 10;
 };
 if (BIG_BOMBS find _weapon > -1) then {

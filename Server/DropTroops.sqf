@@ -56,7 +56,7 @@ if ((TownGroups select _i) isEqualTo grpNull || {side (TownGroups select _i) == 
 			[_man, "B_Parachute"] remoteExec ["addBackpack", _player, false];
 			
 			// Give award
-			"pullNotification" remoteExec ["playSound", _player, false];		
+			"pullNotification" remoteExec ["playSound", _player, false];
 			[_player, format["Parachute insertion | +$%1", TROOP_PARACHUTE_AWARD]] remoteExec ["groupChat", _player, false];
 			[_player, TROOP_PARACHUTE_AWARD] remoteExec ["FNC_ChangeMoney", 2, false];
 			

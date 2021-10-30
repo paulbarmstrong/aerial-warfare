@@ -42,6 +42,12 @@ class Params {
 		values[] = {1, 0};
 		default = 1;
 	};
+	class UseHitmarkers {
+		title = "Include hitmarkers:";
+		texts[] = {"Yes", "No"};
+		values[] = {1, 0};
+		default = 1;
+	};
 	class StartingMoney {
 		title = "Money at the start of the mission:";
 		texts[] = {"$0", "$1000", "$2500", "$5000", "$10000", "$20000"};

@@ -64,11 +64,13 @@ enableSaving [false, false];
 	// Add EventHandlers for AI respawn
 	_x addEventHandler ["Respawn","(_this select 0) spawn FNC_AIRespawn;"];
 	_x addEventHandler ["Killed","_this spawn FNC_EntityKilled; _this spawn FNC_DeathMessage;"];
-	_x addEventHandler ["Hit", FNC_DistributeHitmarkers];
-	(group _x) setVariable["Money", "StartingMoney" call BIS_fnc_getParamValue, true];
-	if (name _x == "PULL") then {
-		(group _x) setVariable["Money", 200000, true];
+	if (USE_HITMARKERS) then {
+		_x addEventHandler ["Hit", FNC_DistributeHitmarkers];
 	};
+	(group _x) setVariable["Money", "StartingMoney" call BIS_fnc_getParamValue, true];
+//	if (name _x == "PULL") then {
+//		(group _x) setVariable["Money", 200000, true];
+//	};
 	
 	// Make flag to prevent duplicate AIRespawns
 	(group _x) setVariable ["warfare_need_spawn", true];
@@ -115,9 +117,6 @@ for "_i" from 0 to (count Opfor_Convoy_Groups - 1) do {
 	_newMarker setMarkerAlpha 0;
 };
 
-// Define behavior for when a player disconnects
-
-
 // Run scripts
 //=========================================
 
@@ -141,6 +140,8 @@ addMissionEventHandler ["PlayerDisconnected", {
 
 // Plans
 //=========================================
+
+// Create a script to allow any airplane to perform a tailhook landing on the carrier
 
 // There is some something causing the log to be spammed with message about destroy
 // and it has something to do with playableAI behavior

@@ -52,6 +52,10 @@ AI_HELI_BLACKLIST = ["B_Heli_Light_01_dynamicLoadout_F","B_Heli_Transport_03_una
 // These are considered big bombs by certain damage handlers
 BIG_BOMBS = ["Bomb_04_Plane_CAS_01_F", "Bomb_03_Plane_CAS_02_F"];
 
+USE_HITMARKERS = false;
+if (("UseHitmarkers" call BIS_fnc_getParamValue) == 1) then {
+	USE_HITMARKERS = true;
+};
 
 //=========================================
 // Misc Values Overwritten if using RHS

@@ -38,7 +38,9 @@ for "_i" from 0 to (_controlNearbyLZ - 1) do {
 		for "_j" from 0 to (count _turrets - 1) do {
 			_newUnit = _newGroup createUnit[BLUFOR_DEFAULT_RIFLEMAN, position (_turrets select _j), [], 0, "NONE"];
 			_newUnit addEventHandler ["Killed", FNC_EntityKilled];
-			_newUnit addEventHandler ["Hit", FNC_DistributeHitmarkers];
+			if (USE_HITMARKERS) then {
+				_newUnit addEventHandler ["Hit", FNC_DistributeHitmarkers];
+			};
 			_units = _units + [_newUnit]; 
 		};
 		TownGroups set [_bluforClosestTowns select _i, _newGroup];
@@ -58,7 +60,9 @@ for "_i" from 0 to (_controlNearbyLZ - 1) do {
 		for "_j" from 0 to (count _turrets - 1) do {
 			_newUnit = _newGroup createUnit[OPFOR_DEFAULT_RIFLEMAN, position (_turrets select _j), [], 0, "NONE"];
 			_newUnit addEventHandler ["Killed", FNC_EntityKilled];
-			_newUnit addEventHandler ["Hit", FNC_DistributeHitmarkers];
+			if (USE_HITMARKERS) then {
+				_newUnit addEventHandler ["Hit", FNC_DistributeHitmarkers];
+			};
 			_units = _units + [_newUnit];
 		};
 		TownGroups set [_opforClosestTowns select _i, _newGroup];
@@ -114,7 +118,9 @@ if (_initialOccupation > 0) then {
 				
 					_newUnit = _newGroup createUnit[INDEP_DEFAULT_RIFLEMAN, position (_turrets select _j), [], 0, "NONE"];
 					_newUnit setSkill 0.2;
-					_newUnit addEventHandler ["Killed", FNC_EntityKilled];
+					if (USE_HITMARKERS) then {
+						_newUnit addEventHandler ["Killed", FNC_EntityKilled];
+					};
 					_newUnit addEventHandler ["Hit", FNC_DistributeHitmarkers];
 					_units set [_j, _newUnit];
 					_numFilled = _numFilled + 1;
