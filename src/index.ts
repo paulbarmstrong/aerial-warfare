@@ -1,13 +1,9 @@
-import { addAction, AddActionScript, bis, defineMission, GameObject, player, spawn, systemChat, vehicle } from "js-to-sqf"
+import { addAction, AddActionScript, bis, Config, configFile, defineMission, enableSaving, GameObject, player, spawn, systemChat, typeOf, vehicle } from "js-to-sqf"
 
 export default defineMission({
 	initServer: () => {
-		//enableSaving [false, false];
-
-
-		//=========================================
-		// Initialize global variables and towns:
-
+		enableSaving(false)
+		
 		[] call FNC_InitializeVars;
 		[] call FNC_SetUpTowns;
 

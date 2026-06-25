@@ -17,8 +17,7 @@ export function getConvoyVehicles(mod: "RHS" | undefined, side: Side): Array<Str
 	}
 }
 
-
-export const TOWNS = [
+export const TOWNS_CONFIG = [
 	{name: "Agia Maria", size: 50, flag: getGameObjectByVariableName(`townFlag_0`)},
 	{name: "Camp Maxwell", size: 50, flag: getGameObjectByVariableName(`townFlag_1`)},
 	{name: "LZ Connor", size: 100, flag: getGameObjectByVariableName(`townFlag_2`)},
