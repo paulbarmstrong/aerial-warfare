@@ -1,0 +1,22 @@
+{
+  "name": "aerial-warfare",
+  "version": "1.0.0",
+  "description": "This is a multiplayer game mode for the video game Arma III",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/paulbarmstrong/aerial-warfare.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/paulbarmstrong/aerial-warfare/issues"
+  },
+  "homepage": "https://github.com/paulbarmstrong/aerial-warfare#readme",
+  "dependencies": {
+    "js-to-sqf": "^1.0.0"
+  }
+}
