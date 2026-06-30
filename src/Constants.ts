@@ -1,4 +1,4 @@
-import { bis, getGameObjectByVariableName, missionNamespace, setVariable, west, east, Side } from "js-to-sqf"
+import { bis, getGameObjectByVariableName, missionNamespace, setVariable, west, east, Side, independent } from "js-to-sqf"
 import { AircraftConfig, RiflemanConfig, SlingableConfig } from "./Types"
 
 export function getConvoyVehicles(mod: "RHS" | undefined, side: Side): Array<String> {
@@ -14,6 +14,30 @@ export function getConvoyVehicles(mod: "RHS" | undefined, side: Side): Array<Str
 		} else {
 			return ["O_MRAP_02_hmg_F", "O_MRAP_02_gmg_F", "O_MRAP_02_hmg_F"]
 		}
+	}
+}
+
+export function getMarkerColorForSide(side: Side | undefined) {
+	if (side === west()) {
+		return "colorBLUFOR"
+	} else if (side === east()) {
+		return "colorOPFOR"
+	} else if (side === independent()) {
+		return "colorGreen"
+	} else {
+		return "colorWhite"
+	}
+}
+
+export function getTownFlagClassNameForSide(side: Side | undefined) {
+	if (side === west()) {
+		return "Flag_Blue_F"
+	} else if (side === east()) {
+		return "Flag_Red_F"
+	} else if (side === independent()) {
+		return "Flag_Green_F"
+	} else {
+		return "FlagPole_F"
 	}
 }
 
@@ -34,15 +58,19 @@ export const TROOP_PARACHUTE_AWARD = 30
 export const TOWN_CAPTURE_AWARD = 500
 export const TOWN_CLEAR_AWARD = 500
 export const MINIMUM_INCOME = 0
+export const INITIAL_TOWN_TROOPS_DELAY_SECONDS = 0.02
 export const INCOME_PER_TOWN_TROOP = bis.getParamValue("TroopIncomeFactor")
 export const USE_HITMARKERS = bis.getParamValue("UseHitmarkers") === 1
 export const USE_RHS = bis.getParamValue("UseRHS") === 1
+export const MODS = USE_RHS ? ["RHS"] : []
+export const INITIAL_OCCUPATION = bis.getParamValue("InitialOccupation")
+export const CONTROL_NEARBY_LZ = bis.getParamValue("ControlNearbyLZ")
 
 setVariable(missionNamespace(), "SlingMarkerTally", 0)
 setVariable(missionNamespace(), "SlingMarkerArray", [])
 setVariable(missionNamespace(), "SlingVehicleArray", [])
 
-const RIFLEMEN: Array<RiflemanConfig> = [
+export const RIFLEMEN: Array<RiflemanConfig> = [
 	{side: "independent", className: "I_soldier_F"},
 	{side: west(), className: "B_Soldier_F"},
 	{side: east(), className: "O_Soldier_F"},

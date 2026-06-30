@@ -1,11 +1,11 @@
 import { addAction, AddActionScript, bis, Config, configFile, defineMission, enableSaving, GameObject, player, spawn, systemChat, typeOf, vehicle } from "js-to-sqf"
+import { setUpTowns } from "./Towns"
 
 export default defineMission({
 	initServer: () => {
 		enableSaving(false)
 		
-		[] call FNC_InitializeVars;
-		[] call FNC_SetUpTowns;
+		setUpTowns()
 
 		// Initialize playable AI stuff
 		//=========================================

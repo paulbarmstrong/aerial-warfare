@@ -1,4 +1,4 @@
-import { Side } from "js-to-sqf"
+import { GameObject, Group, Side } from "js-to-sqf"
 
 export type RiflemanConfig = {
 	side: Side | "independent",
@@ -33,4 +33,15 @@ export type AircraftConfig = {
 		}>,
 		slingNum?: number
 	}>
+}
+
+export type Town = {
+    marker: string;
+    helipad: GameObject;
+    turretHolder: GameObject;
+    turrets: GameObject[];
+    group: Group;
+    name: string;
+    size: number;
+    flag: GameObject;
 }
