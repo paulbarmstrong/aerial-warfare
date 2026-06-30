@@ -1,5 +1,6 @@
-import { addAction, AddActionScript, bis, Config, configFile, defineMission, enableSaving, GameObject, player, spawn, systemChat, typeOf, vehicle } from "js-to-sqf"
+import { addAction, AddActionScript, bis, Config, configFile, createMarker, defineMission, enableSaving, GameObject, group, groupId, groupId, isPlayer, name, playableUnits, player, position, setMarkerColor, setMarkerText, setMarkerType, Side, side, spawn, systemChat, typeOf, vehicle } from "js-to-sqf"
 import { setUpTowns } from "./Towns"
+import { getMarkerColorForSide } from "./Constants"
 
 export default defineMission({
 	initServer: () => {
@@ -7,23 +8,23 @@ export default defineMission({
 		
 		setUpTowns()
 
+		playableUnits().forEach(unit => {
+			const unitSide: Side = side(unit)
+			const unitGroupId: string = groupId(group(unit))
+			const newMarker = createMarker(`${unitSide} ${unitGroupId}_marker`, position(unit))
+			setMarkerType(newMarker, "mil_dot")
+			if (isPlayer(unit)) {
+				setMarkerText(newMarker, name(player))
+			} else {
+				setMarkerText(newMarker, unitGroupId)
+			}
+			setMarkerColor(newMarker, getMarkerColorForSide(unitSide))
+		})
+
 		// Initialize playable AI stuff
 		//=========================================
 
 		{	
-			// Create markers for all playable units
-			_side = side _x;
-			_groupID = groupID (group _x);
-			_newMarkerName = format["%1_%2_marker", _side, _groupID];
-			_newMarker = createMarker[_newMarkerName, position _x];
-			_newMarker setMarkerType "mil_dot";
-			if (isPlayer _x) then {
-				_newMarker setMarkerText (name player);
-			} else {
-				_newMarker setMarkerText _groupID;
-			};
-			if (_side == west) then { _newMarker setMarkerColor "colorBLUFOR"; } else { _newMarker setMarkerColor "colorOPFOR"; };
-			
 			// Add EventHandlers for AI respawn
 			_x addEventHandler ["Respawn","(_this select 0) spawn FNC_AIRespawn;"];
 			_x addEventHandler ["Killed","_this spawn FNC_EntityKilled; _this spawn FNC_DeathMessage;"];

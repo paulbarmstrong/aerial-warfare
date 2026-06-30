@@ -1,5 +1,13 @@
-import { bis, getGameObjectByVariableName, missionNamespace, setVariable, west, east, Side, independent } from "js-to-sqf"
+import { bis, getGameObjectByVariableName, missionNamespace, setVariable, west, east, Side, independent, getText, Config, typeOf, configFile, GameObject } from "js-to-sqf"
 import { AircraftConfig, RiflemanConfig, SlingableConfig } from "./Types"
+
+export function getUnitDisplayName(unit: GameObject) {
+	const slingable = SLINGABLES.find(x => x.className === typeOf(unit))
+	if (slingable?.name !== undefined) {
+		return slingable.name
+	}
+	return getText(new Config(configFile(), "CfgVehicles", typeOf(unit), "displayName"))
+}
 
 export function getConvoyVehicles(mod: "RHS" | undefined, side: Side): Array<String> {
 	if (mod === "RHS") {
@@ -51,7 +59,13 @@ export const TOWNS_CONFIG = [
 	{name: "Camp Tempest", size: 50, flag: getGameObjectByVariableName(`townFlag_6`)}
 ]
 
-export const TROOP_KILL_AWARD = 50
+export const UNIT_KILL_AWARD_CATEGORIES = [
+	{kind: "Man", money: 50},
+	{kind: "Car", money: 500},
+	{kind: "Tank", money: 1000},
+	{kind: "Helicopter", money: 500}
+]
+
 export const LZ_KILL_AWARD = 100
 export const TROOP_LANDING_AWARD = 50
 export const TROOP_PARACHUTE_AWARD = 30
@@ -65,6 +79,7 @@ export const USE_RHS = bis.getParamValue("UseRHS") === 1
 export const MODS = USE_RHS ? ["RHS"] : []
 export const INITIAL_OCCUPATION = bis.getParamValue("InitialOccupation")
 export const CONTROL_NEARBY_LZ = bis.getParamValue("ControlNearbyLZ")
+export const STARTING_MONEY = bis.getParamValue("StartingMoney")
 
 setVariable(missionNamespace(), "SlingMarkerTally", 0)
 setVariable(missionNamespace(), "SlingMarkerArray", [])
@@ -79,7 +94,7 @@ export const RIFLEMEN: Array<RiflemanConfig> = [
 	{side: east(), mod: "RHS", className: "rhs_vdv_flora_rifleman"},
 ]
 
-const SLINGABLES: Array<SlingableConfig> = [
+export const SLINGABLES: Array<SlingableConfig> = [
 	{sides: [west()], className: "B_G_Offroad_01_armed_F", price: 100},
 	{sides: [west()], className: "B_G_Offroad_01_AT_F", price: 250},
 	{sides: [west()], className: "B_LSV_01_AT_F", price: 1000, name: "Prowler (AA)", antiAir: true},
@@ -109,7 +124,7 @@ export const TEXTURE_REPLACEMENTS = [
 	{className: "B_Heli_Transport_01_F", side: east(), textureIndex: 1, texture: "Images\\opfor_hex_camo_2048.jpg"}
 ]
 
-const AIRCRAFT: Array<AircraftConfig> = [
+export const AIRCRAFT: Array<AircraftConfig> = [
 	{
 		name: "MH-9 Hummingbird",
 		price: 0,
