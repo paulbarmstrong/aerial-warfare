@@ -70,7 +70,6 @@ export const LZ_KILL_AWARD = 100
 export const TROOP_LANDING_AWARD = 50
 export const TROOP_PARACHUTE_AWARD = 30
 export const TOWN_CAPTURE_AWARD = 500
-export const TOWN_CLEAR_AWARD = 500
 export const MINIMUM_INCOME = 0
 export const INITIAL_TOWN_TROOPS_DELAY_SECONDS = 0.02
 export const INCOME_PER_TOWN_TROOP = bis.getParamValue("TroopIncomeFactor")

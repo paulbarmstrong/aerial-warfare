@@ -1,7 +1,8 @@
-import { configFile, driver, GameObject, getDammage, getText, getVariable, group, groupChat, isKindOf, isNil, isPlayer, leader, playableUnits, remoteExec, setDamage, setVariable, Side, side, typeOf, vehicle } from "js-to-sqf";
+import { Config, configFile, driver, GameObject, getDammage, getText, getVariable, group, groupChat, gunner, isKindOf, isNil, isPlayer, leader, playableUnits, remoteExec, setDamage, setVariable, Side, side, typeOf, vehicle } from "js-to-sqf";
 import { displayHitmarker } from "../Client/Hitmarker";
 import { getUnitDisplayName } from "../Constants";
 import { changeMoney, getKillAward } from "./Money";
+import { getTowns, refreshTown } from "./Towns";
 
 export async function distributeHitmarker(unit: GameObject, hitter: GameObject) {
 	if (isPlayer(driver(vehicle(hitter))) && side(group(hitter)) !== side(group(unit))) {
@@ -44,73 +45,31 @@ export async function onUnitKilled(unit: GameObject, killer: GameObject) {
 			const owner = driver(vehicle(killer))
 			remoteExec([owner, `Neutralized enemy ${unitDisplayName} | +$${award}`], groupChat, owner, false)
 			changeMoney(owner, award)
-		} else {
-			if (playableUnits().includes(leader(getVariable(killer, "warfare_owner")))) {
-				const owner = leader(getVariable(killer, "warfare_owner"))
-				remoteExec([owner, `Your ${killerDisplayName} neutralized an enemy ${unitDisplayName} | +$${award}`], groupChat, owner, false)
-				changeMoney(owner, award)
+		} else if (playableUnits().includes(leader(getVariable(killer, "warfare_owner")))) {
+			const owner = leader(getVariable(killer, "warfare_owner"))
+			remoteExec([owner, `Your ${killerDisplayName} neutralized an enemy ${unitDisplayName} | +$${award}`], groupChat, owner, false)
+			changeMoney(owner, award)
+		}
+	}
+
+	// Do things if this guy was guarding a base
+	const towns = getTowns()
+	for (const town of towns) {
+		for (const turret of town.turrets) {
+			if (unit === gunner(turret)) {
+				refreshTown(town, undefined)
 			}
 		}
 	}
+
+	if (playableUnits().includes(unit)) {
+		setDamage(vehicle(unit), 1)
+	}
+
+	// If they were someone's car, let them know it got destroyed
+	const carOwner: GameObject = leader(getVariable(unit, "warfare_owner"))
+	if (carOwner !== undefined && (isKindOf(unit, "Tank") || isKindOf(unit, "Car"))) {
+		const carName: string = getText(new Config(configFile(), "CfgVehicles", typeOf(vehicle(unit)), "displayName"))
+		remoteExec([carOwner, `Your ${carName} was destroyed.`], groupChat, carOwner, false)
+	}
 }
-
-// Do things if this guy was guarding a base
-
-for "_i" from 0 to (count TownMarkers - 1) do {
-	if (((TownUnits select _i) find _unit) > -1) then {
-	
-		_numberAlive = 0;
-		for "_j" from 0 to ((count (TownUnits select _i)) - 1) do {
-			if (alive (TownUnits select _i select _j)
-					&& {vehicle (TownUnits select _i select _j) == TownTurrets select _i select _j}) then {
-				_numberAlive = _numberAlive + 1;
-			};
-		};
-		TownUnitCounts set [_i, _numberAlive];
-
-		[] call FNC_UpdateIncomes;
-		
-		if (_numberAlive > 0) then {
-			TownMarkers select _i setMarkerText format["%1: %2/%3",TownNames select _i,_numberAlive,count (TownTurrets select _i)];
-		} else {
-			deleteGroup (TownGroups select _i);
-			TownGroups set[_i,grpNull];
-			if (getMarkerColor (TownMarkers select _i) != "colorWhite") then {
-				// Town has been lost
-				TownMarkers select _i setMarkerColor "colorWhite";
-				TownMarkers select _i setMarkerText format["%1: 0/%2",TownNames select _i,count (TownTurrets select _i)];
-				_oldFlag = TownFlags select _i;
-				_flagPos = position _oldFlag;
-				deleteVehicle _oldFlag;
-				_newFlag = "FlagPole_F" createVehicle _flagPos;
-				_newFlag setPos _flagPos;
-				TownFlags set[_i,_newFlag];
-				
-				// If the killer's driver was a playableAI
-				// (means the playableAI's vehicle cleared the lz), reward them
-				_owner = leader (_killer getVariable "warfare_owner");
-				if (isNil "_owner") then {
-					_owner = driver vehicle _killer;
-				};
-				if (playableUnits find _owner > -1 && {_unitSide != _killerSide}) then {
-					[_owner, format["Cleared enemy landing zone %1 | +$%2", TownNames select _i, TOWN_CLEAR_AWARD]]
-							remoteExec ["groupChat", _owner, false];
-					[_owner, TOWN_CLEAR_AWARD] remoteExec ["FNC_ChangeMoney", 2, false];
-				};
-			};
-		};
-	};
-};
-
-// If they were a playable unit blow up their helicopter
-if (playableUnits find _unit > -1) then {
-	(vehicle _unit) setDamage 1;
-};
-
-// If they were someone's car, let them know it got rekt
-_carOwner = leader (_unit getVariable "warfare_owner");
-if (!isNil "_carOwner" && {_unit isKindOf "Tank" || _unit isKindOf "Car"}) then {
-	_carName = getText(configFile >> "CfgVehicles" >> (typeOf vehicle _unit) >> "displayName");
-	[_carOwner, format["Your %1 was destroyed.", _carName]] remoteExec ["groupChat", _carOwner, false];
-	
-};

@@ -1,9 +1,9 @@
-import { addEventHandler, alive, allowDamage, assignAsGunner, attachTo, bis, createGroup, createGroupV2, createMarker, createVehicle, deleteVehicle, distance2D, east, GameObject, getDir, getMarkerPos, getVariable, globalChat, group, Group, groupChat, grpNull, gunner, hideObject, independent, leader, markerColor, missionNamespace, moveInGunner, nearestObject, nearestObjects, position, PositionAGLS, publicVariable, remoteExec, setDamage, setDir, setMarkerColor, setMarkerText, setMarkerType, setPos, setVariable, setVectorDir, setVehicleAmmo, side, Side, sleep, spawn, str, TurretPath, west } from "js-to-sqf"
-import { CONTROL_NEARBY_LZ, getMarkerColorForSide, getTownFlagClassNameForSide, INITIAL_OCCUPATION, INITIAL_TOWN_TROOPS_DELAY_SECONDS, RIFLEMEN, TOWN_CAPTURE_AWARD, TOWNS_CONFIG, USE_HITMARKERS, USE_RHS } from "../Constants";
+import { addEventHandler, alive, allowDamage, assignAsGunner, attachTo, bis, createGroup, createGroupV2, createMarker, createVehicle, deleteVehicle, distance2D, east, GameObject, getDir, getMarkerColor, getMarkerPos, getVariable, globalChat, group, Group, groupChat, grpNull, gunner, hideObject, independent, leader, markerColor, missionNamespace, moveInGunner, nearestObject, nearestObjects, position, PositionAGLS, publicVariable, remoteExec, setDamage, setDir, setMarkerColor, setMarkerText, setMarkerType, setPos, setVariable, setVectorDir, setVehicleAmmo, side, Side, sleep, spawn, str, TurretPath, west } from "js-to-sqf"
+import { CONTROL_NEARBY_LZ, getMarkerColorForSide, getTownFlagClassNameForSide, INCOME_PER_TOWN_TROOP, INITIAL_OCCUPATION, INITIAL_TOWN_TROOPS_DELAY_SECONDS, MINIMUM_INCOME, RIFLEMEN, TOWN_CAPTURE_AWARD, TOWNS_CONFIG, USE_HITMARKERS, USE_RHS } from "../Constants";
 import { Town } from "../Types";
-import { onKilled } from "./Killed";
 import { distributeHitmarker } from "./Hit";
-import { changeMoney, updateIncomes } from "./Income";
+import { changeMoney } from "./Money";
+import { onUnitKilled } from "./EventHandlers";
 
 export function setUpTowns() {
 	setVariable(missionNamespace(), "BluforHelipads", nearestObjects(getMarkerPos("bluforMarker"), ["HeliH"], 200, true))
@@ -114,7 +114,7 @@ function putOriginalTownMen() {
 					const riflemanClassName = RIFLEMEN.find(r => r.side === independent() && r.mod === (USE_RHS ? "RHS" : undefined))!.className
 					const newUnit: GameObject = createUnit(newGroup, riflemanClassName, position(turret), [], 0, "NONE")
 					setSkill(newUnit, 0.2)
-					addEventHandler(newUnit, "Killed", onKilled)
+					addEventHandler(newUnit, "Killed", onUnitKilled)
 					if (USE_HITMARKERS) {
 						addEventHandler(newUnit, "Hit", distributeHitmarker)
 					}
@@ -131,46 +131,56 @@ function putOriginalTownMen() {
 function onGetInTurret(turret: GameObject, man: GameObject, townIndex: number) {
 	const towns: Array<Town> = getTowns()
 	const town: Town = towns[townIndex]
-	const manSide: Side = side(group(man))
-
 	setDamage(man, 0)
+	setVariable(man, "warfare_owner", grpNull)
+	refreshTown(town, man)
+}
 
-	updateIncomes()
+export function refreshTown(town: Town, newUnit: GameObject | undefined) {
+	const townUnits: Array<GameObject> = town.turrets.map(turret => gunner(turret)).filter(unit => unit !== undefined)
+	const townSide: Side | undefined = townUnits.length > 0 ? side(townUnits[0]) : undefined
+	setMarkerText(town.marker, `${town.name}: ${townUnits.length}/${town.turrets.length}`)
 
-	if (markerColor(town.marker) == "colorWhite") {
+	if (getMarkerColor(town.marker) !== getMarkerColorForSide(townSide)) {
+		setMarkerColor(town.marker, getMarkerColorForSide(townSide))
 
-		// Replace the flag
-		const oldFlag = town.flag
-		setMarkerColor(town.marker, getMarkerColorForSide(manSide))
+		const oldFlag: GameObject = town.flag
 		const flagPos: PositionAGLS = position(oldFlag)
-		
 		deleteVehicle(oldFlag)
-		
-		const newFlag = createVehicle(getTownFlagClassNameForSide(manSide), flagPos)
+		const newFlag = createVehicle(getTownFlagClassNameForSide(townSide), flagPos)
 		setPos(newFlag, flagPos)
 		town.flag = newFlag
-		setTowns(towns)
-		
-		// Do income/dialog things
-		if (getVariable(man, "warfare_owner").toString() != "") {
-			const owner = leader(getVariable(man, "warfare_owner"))
-			remoteExec([owner, `Captured ${town.name} | +$${TOWN_CAPTURE_AWARD}`], groupChat, owner, false)
-			changeMoney(group, TOWN_CAPTURE_AWARD)
-		}
-		globalChat(man, `${town.name} has been captured by the ${manSide}`)
 
-		// Check to see if all towns are now friendly
-		const allFriendly: boolean = getTowns().filter(town => markerColor(town.marker) !== getMarkerColorForSide(manSide)).length === 0
-		
+		if (townUnits.length === 0) {
+			town.group = grpNull
+		}
+
+		if (newUnit !== undefined) {
+			const owner: GameObject = leader(getVariable(newUnit, "warfare_owner"))
+			remoteExec([owner, `Captured ${town.name} | +$${TOWN_CAPTURE_AWARD}`], groupChat, owner, false)
+			changeMoney(owner, TOWN_CAPTURE_AWARD)
+			remoteExec([newUnit, `${town.name} has been captured by the ${townSide}`], globalChat, undefined, true)
+		}
+
 		// If all towns are friendly, the mission should end
-		if (allFriendly && manSide !== independent()) {
+		const allFriendly: boolean = getTowns().filter(town => markerColor(town.marker) !== getMarkerColorForSide(townSide)).length === 0
+		if (allFriendly && townSide !== independent()) {
 			bis.endMissionServer("EveryoneWon")
 		}
+		setTown(town)
 	}
-	setVariable(man, "warfare_owner", grpNull)
 
-	// Update town alive count on map
-	setMarkerText(town.marker, `${town.name}: ${getTownNumAlive(town)}/${town.turrets.length}`)
+	const towns: Array<Town> = getVariable(missionNamespace, "Towns")
+	const numBluforTownTroops: number = towns
+		.flatMap(town => town.turrets)
+		.filter(turret => alive(gunner(turret)) && side(gunner(turret)) === "west")
+		.length
+	const numOpforTownTroops: number = towns
+		.flatMap(town => town.turrets)
+		.filter(turret => alive(gunner(turret)) && side(gunner(turret)) === "east")
+		.length
+	setVariable(missionNamespace, "BluforIncome", MINIMUM_INCOME + (numBluforTownTroops * INCOME_PER_TOWN_TROOP), true)
+	setVariable(missionNamespace, "OpforIncome", MINIMUM_INCOME + (numOpforTownTroops * INCOME_PER_TOWN_TROOP), true)
 }
 
 export function getTowns(): Array<Town> {
@@ -179,6 +189,13 @@ export function getTowns(): Array<Town> {
 
 export function setTowns(towns: Array<Town>) {
 	return setVariable(missionNamespace(), "Towns", towns, true)
+}
+
+export function setTown(town: Town) {
+	const towns: Array<Town> = getTowns()
+	const townIndex: number = towns.findIndex(x => x.name === town.name)
+	towns[townIndex] = town
+	setTowns(towns)
 }
 
 export function getTownNumAlive(town: Town): number {

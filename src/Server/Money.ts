@@ -1,6 +1,5 @@
-import { alive, GameObject, getVariable, group, grpNull, gunner, isKindOf, missionNamespace, setVariable, side, typeOf } from "js-to-sqf";
-import { Town } from "../Types";
-import { AIRCRAFT, INCOME_PER_TOWN_TROOP, LZ_KILL_AWARD, MINIMUM_INCOME, SLINGABLES, UNIT_KILL_AWARD_CATEGORIES } from "../Constants";
+import { GameObject, getVariable, group, grpNull, isKindOf, setVariable, typeOf } from "js-to-sqf";
+import { AIRCRAFT, LZ_KILL_AWARD, SLINGABLES, UNIT_KILL_AWARD_CATEGORIES } from "../Constants";
 import { getTowns } from "./Towns";
 
 export function changeMoney(unit: GameObject, delta: number) {
@@ -9,23 +8,6 @@ export function changeMoney(unit: GameObject, delta: number) {
 		const newMoney = (getVariable(grp, "Money") ?? 0) + delta;
 		setVariable(grp, "Money", newMoney, true)
 	}
-}
-
-export function updateIncomes() {
-	const towns: Array<Town> = getVariable(missionNamespace, "Towns")
-
-	const numBluforTownTroops: number = towns
-		.flatMap(town => town.turrets)
-		.filter(turret => alive(gunner(turret)) && side(gunner(turret)) === "west")
-		.length
-
-	const numOpforTownTroops: number = towns
-		.flatMap(town => town.turrets)
-		.filter(turret => alive(gunner(turret)) && side(gunner(turret)) === "east")
-		.length
-	
-	setVariable(missionNamespace, "BluforIncome", MINIMUM_INCOME + (numBluforTownTroops * INCOME_PER_TOWN_TROOP), true)
-	setVariable(missionNamespace, "OpforIncome", MINIMUM_INCOME + (numOpforTownTroops * INCOME_PER_TOWN_TROOP), true)
 }
 
 export function getKillAward(unit: GameObject): number {
