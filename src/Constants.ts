@@ -132,10 +132,10 @@ setVariable(missionNamespace(), "SlingMarkerArray", [])
 setVariable(missionNamespace(), "SlingVehicleArray", [])
 
 export const RIFLEMEN: Array<RiflemanConfig> = [
-	{side: independent, className: "I_soldier_F"},
+	{side: independent(), className: "I_soldier_F"},
 	{side: west(), className: "B_Soldier_F"},
 	{side: east(), className: "O_Soldier_F"},
-	{side: independent, mod: "RHS", className: "rhsgref_ins_g_rifleman"},
+	{side: independent(), mod: "RHS", className: "rhsgref_ins_g_rifleman"},
 	{side: west(), mod: "RHS", className: "rhsusf_usmc_marpat_wd_rifleman_m4"},
 	{side: east(), mod: "RHS", className: "rhs_vdv_flora_rifleman"},
 ]
