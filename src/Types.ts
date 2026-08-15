@@ -1,7 +1,7 @@
 import { GameObject, Group, Side } from "@paulbarmstrong/js-to-sqf"
 
 export type RiflemanConfig = {
-	side: Side | "independent",
+	side: Side,
 	mod?: "RHS",
 	className: string,
 }
