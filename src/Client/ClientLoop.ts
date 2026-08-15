@@ -1,6 +1,6 @@
 import { actionIDs, actionParams, addAction, bis, distance2D, GameObject, getVariable, group, isTouchingGround,
 	missionNamespace, player, position, remoteExec, removeAction, setVariable, side, sleep, spawn, typeOf, uiNamespace,
-	vectorAdd, vectorMagnitude, vehicle, velocity, west } from "js-to-sqf"
+	vectorAdd, vectorMagnitude, vehicle, velocity, west } from "@paulbarmstrong/js-to-sqf"
 import { getJetSpotForSide } from "../Constants"
 import { dropTroops, letTroopsOut } from "../Server/Spawn"
 import { getTowns } from "../Server/Towns"

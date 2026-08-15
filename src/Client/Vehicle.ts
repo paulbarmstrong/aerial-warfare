@@ -1,5 +1,5 @@
 import { alive, bis, doWatch, GameObject, getAllHitPointsDamage, group, isTouchingGround, player, screenToWorld,
-	setBehaviour, setHitIndex, setVariable, sleep, spawn, uiNamespace, vectorMagnitude, vehicle, velocity } from "js-to-sqf"
+	setBehaviour, setHitIndex, setVariable, sleep, spawn, uiNamespace, vectorMagnitude, vehicle, velocity } from "@paulbarmstrong/js-to-sqf"
 import { sortie } from "./Sortie"
 
 export async function repairUpTo(vehicle: GameObject, damageFloor: number) {

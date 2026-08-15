@@ -1,4 +1,4 @@
-import { driver, GameObject, group, isPlayer, remoteExec, side, vehicle } from "js-to-sqf";
+import { driver, GameObject, group, isPlayer, remoteExec, side, vehicle } from "@paulbarmstrong/js-to-sqf";
 import { displayHitmarker } from "../Client/Hitmarker";
 
 export async function distributeHitmarker(unit: GameObject, hitter: GameObject) {

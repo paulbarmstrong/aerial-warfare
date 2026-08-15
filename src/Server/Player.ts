@@ -1,4 +1,4 @@
-import { addEventHandler, GameObject, group, position, setVariable, spawn } from "js-to-sqf"
+import { addEventHandler, GameObject, group, position, setVariable, spawn } from "@paulbarmstrong/js-to-sqf"
 import { STARTING_MONEY, USE_HITMARKERS } from "../Constants"
 import { onUnitKilled } from "./EventHandlers"
 import { distributeHitmarker } from "./Hit"

@@ -1,7 +1,7 @@
 import { addEventHandler, addWaypoint, allowCrewInImmobile, bis, createGroupV2, createMarker, deleteGroup, deleteWaypoint,
 	distance2D, enableRopeAttach, GameObject, getDir, getVariable, Group, grpNull, leader, limitSpeed, lock, missionNamespace,
 	position, setBehaviour, setFormation, setMarkerAlpha, setMarkerColor, setMarkerType, setVariable, setWaypointType, side,
-	Side, spawn, units, vehicle, waypointPosition, waypoints, west } from "js-to-sqf"
+	Side, spawn, units, vehicle, waypointPosition, waypoints, west } from "@paulbarmstrong/js-to-sqf"
 import { getConvoyVehicles, getCurrentMod, getGarageForSide, NUM_CONVOYS, USE_HITMARKERS } from "../Constants"
 import { onUnitKilled } from "./EventHandlers"
 import { distributeHitmarker } from "./Hit"

@@ -2,7 +2,7 @@ import { alive, allowDamage, assignAsCargo, Config, configFile, deleteVehicle, d
 	getAllHitPointsDamage, getDammage, getText, getVariable, group, groupChat, groupId, gunner, isKindOfV3, isNull,
 	isObjectHidden, isPlayer, leader, moveInCargo, name, nearestObjects, PositionAGLS, playableUnits, position, remoteExec,
 	setDamage, setFuel, setHitIndex, setMarkerAlpha, setVariable, side, sleep, systemChat, typeOf, unassignVehicle, vehicle,
-	waypoints } from "js-to-sqf"
+	waypoints } from "@paulbarmstrong/js-to-sqf"
 import { displayHitmarker } from "../Client/Hitmarker"
 import { BIG_BOMB_CLASSNAMES } from "../Constants"
 import { onUnitKilled } from "./EventHandlers"

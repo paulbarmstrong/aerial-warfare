@@ -1,6 +1,6 @@
 import { addEventHandler, addMissionEventHandler, createMarker, defineMission, enableSaving, findDisplay,
 	group, groupId, isNull, isPlayer, missionNamespace, name, playableUnits, player, position, setMarkerColor,
-	setMarkerText, setMarkerType, setVariable, Side, side, spawn, uiNamespace, waitUntil } from "js-to-sqf"
+	setMarkerText, setMarkerType, setVariable, Side, side, spawn, uiNamespace, waitUntil } from "@paulbarmstrong/js-to-sqf"
 import { getMarkerColorForSide, MINIMUM_INCOME } from "./Constants"
 import { clientLoop } from "./Client/ClientLoop"
 import { inventoryOpened, playerRespawn } from "./Client/PlayerLocal"

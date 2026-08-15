@@ -1,4 +1,4 @@
-import { setMarkerAlphaLocal } from "js-to-sqf"
+import { setMarkerAlphaLocal } from "@paulbarmstrong/js-to-sqf"
 
 export async function showMarkers(markers: Array<string>) {
 	markers.forEach(marker => setMarkerAlphaLocal(marker, 1))

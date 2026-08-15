@@ -6,7 +6,7 @@ import { action, addBackpack, addEventHandler, addMagazineTurret, addWeaponTurre
 	owner, playableUnits, playSound, position, remoteExec, removeAllActions, removeWeaponTurret, setBehaviour, setCombatMode,
 	setDir, setGroupOwner, setMarkerAlpha, setMarkerColor, setMarkerText, setMarkerType, setObjectTexture, setPosASL,
 	setSlingLoad, setVariable, setVehicleAmmo, setVehicleLock, side, Side, sleep, spawn, unassignVehicle, units, vectorAdd,
-	vehicle, weaponsTurret, west } from "js-to-sqf"
+	vehicle, weaponsTurret, west } from "@paulbarmstrong/js-to-sqf"
 import { AIRCRAFT, getCurrentMod, getDefaultRiflemanForSide, getJetSpotForSide, getMarkerColorForSide, getSpawnPosForSide,
 	getUnitDisplayName, SLINGABLES, TEXTURE_REPLACEMENTS, TROOP_LANDING_AWARD, TROOP_PARACHUTE_AWARD, USE_HITMARKERS } from "../Constants"
 import { AircraftConfig } from "../Types"

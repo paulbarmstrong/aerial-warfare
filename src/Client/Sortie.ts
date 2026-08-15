@@ -3,7 +3,7 @@ import { alive, closeDialog, Config, configFile, Control, createDialog, crew, ct
 	findDisplay, fullCrew, GameObject, getPosASL, getSlingLoad, getText, getVariable, group, groupChat, hideObjectV2, hint,
 	isNull, isPlayer, lbAddV2, lbClearV2, lbCurSelV2, lbSetCurSelV2, lbTextV2, missionNamespace, parseText, player,
 	remoteExec, removeAllActions, removeAllWeapons, setDamage, setPosASL, setVariable, setVelocity, side, sleep, spawn,
-	typeOf, uiNamespace, vehicle, waitUntil, west } from "js-to-sqf"
+	typeOf, uiNamespace, vehicle, waitUntil, west } from "@paulbarmstrong/js-to-sqf"
 import { AIRCRAFT, getCurrentMod, getUnitDisplayName, SLINGABLES } from "../Constants"
 import { AircraftConfig, SlingableConfig } from "../Types"
 import { changeMoney } from "../Server/Money"

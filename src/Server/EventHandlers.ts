@@ -1,4 +1,4 @@
-import { Config, configFile, driver, GameObject, getDammage, getText, getVariable, group, groupChat, gunner, isKindOf, isNil, isPlayer, leader, playableUnits, remoteExec, setDamage, setVariable, Side, side, typeOf, vehicle } from "js-to-sqf";
+import { Config, configFile, driver, GameObject, getDammage, getText, getVariable, group, groupChat, gunner, isKindOf, isNil, isPlayer, leader, playableUnits, remoteExec, setDamage, setVariable, Side, side, typeOf, vehicle } from "@paulbarmstrong/js-to-sqf";
 import { displayHitmarker } from "../Client/Hitmarker";
 import { getUnitDisplayName } from "../Constants";
 import { changeMoney, getKillAward } from "./Money";

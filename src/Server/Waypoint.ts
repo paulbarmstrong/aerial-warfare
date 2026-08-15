@@ -1,6 +1,6 @@
 import { addWaypoint, bis, deleteWaypoint, distance2D, east, fullCrew, gunner, getVariable, Group, land, leader,
 	playableUnits, position, setBehaviour, setVariable, setWaypointStatements, setWaypointType, side, spawn, typeOf,
-	vehicle, waypointPosition, waypoints, west } from "js-to-sqf"
+	vehicle, waypointPosition, waypoints, west } from "@paulbarmstrong/js-to-sqf"
 import { getSpawnPosForSide } from "../Constants"
 import { aiLandAtBase, aiTroopLanding } from "./Spawn"
 import { getTowns } from "./Towns"

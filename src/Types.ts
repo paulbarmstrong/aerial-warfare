@@ -1,4 +1,4 @@
-import { GameObject, Group, Side } from "js-to-sqf"
+import { GameObject, Group, Side } from "@paulbarmstrong/js-to-sqf"
 
 export type RiflemanConfig = {
 	side: Side | "independent",

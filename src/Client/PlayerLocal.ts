@@ -1,7 +1,7 @@
 import { allowDamage, assignAsCargo, bis, createGroupV2, createUnit, createVehicleCrew, createVehicleV2,
 	crew, deleteVehicle, GameObject, getDir, getPosASL, group, hideObjectV2, isPlayer, joinSilent,
 	lock, moveInCargo, moveInDriver, player, position, remoteExec, setDir, setPosASL, setPylonLoadout, setVariable, side,
-	uiNamespace, vectorAdd, vehicle } from "js-to-sqf"
+	uiNamespace, vectorAdd, vehicle } from "@paulbarmstrong/js-to-sqf"
 import { AIRCRAFT, getCurrentMod, getDefaultRiflemanForSide, getJetSpotForSide, SLINGABLES } from "../Constants"
 import { applyTextureReplacements } from "../Server/Spawn"
 import { sortie } from "./Sortie"

@@ -1,4 +1,4 @@
-import { alive, bis, fullCrew, getVariable, group, missionNamespace, player, safeZoneX, side, vehicle, west } from "js-to-sqf"
+import { alive, bis, fullCrew, getVariable, group, missionNamespace, player, safeZoneX, side, vehicle, west } from "@paulbarmstrong/js-to-sqf"
 
 export async function displayHUDText() {
 	const money = getVariable(group(player()), "Money")

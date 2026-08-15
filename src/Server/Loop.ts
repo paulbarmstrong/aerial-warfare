@@ -1,7 +1,7 @@
 import { alive, Config, configFile, deleteMarker, distance2D, east, GameObject, getPosASL, getPosATL, getText,
 	getVariable, group, groupChat, groupId, gunner, isPlayer, leader, missionNamespace, moveInGunner, name, orderGetIn,
 	playableUnits, position, remoteExec, setBehaviour, setDamage, setMarkerAlpha, setMarkerPos, setMarkerText,
-	setVariable, side, sleep, spawn, typeOf, units, vehicle, west } from "js-to-sqf"
+	setVariable, side, sleep, spawn, typeOf, units, vehicle, west } from "@paulbarmstrong/js-to-sqf"
 import { getConvoyGroupsForSide, updateConvoyWaypoint } from "./Convoy"
 import { changeMoney } from "./Money"
 import { getTowns } from "./Towns"

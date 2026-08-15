@@ -1,4 +1,4 @@
-import { bis, getGameObjectByVariableName, missionNamespace, setVariable, west, east, Side, independent, getText, Config, typeOf, configFile, GameObject } from "js-to-sqf"
+import { bis, getGameObjectByVariableName, missionNamespace, setVariable, west, east, Side, independent, getText, Config, typeOf, configFile, GameObject } from "@paulbarmstrong/js-to-sqf"
 import { AircraftConfig, RiflemanConfig, SlingableConfig } from "./Types"
 
 export function getUnitDisplayName(unit: GameObject) {

@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/paulbarmstrong/aerial-warfare#readme",
   "dependencies": {
-    "js-to-sqf": "^1.0.0"
+    "@paulbarmstrong/js-to-sqf": "^0.1.0-alpha"
   }
 }

@@ -1,4 +1,4 @@
-import { GameObject, getVariable, group, grpNull, isKindOf, setVariable, typeOf } from "js-to-sqf";
+import { GameObject, getVariable, group, grpNull, isKindOf, setVariable, typeOf } from "@paulbarmstrong/js-to-sqf";
 import { AIRCRAFT, LZ_KILL_AWARD, SLINGABLES, UNIT_KILL_AWARD_CATEGORIES } from "../Constants";
 import { getTowns } from "./Towns";
 

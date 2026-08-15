@@ -1,6 +1,6 @@
 import { actionIDs, actionParams, addAction, addWaypoint, deleteWaypoint, distance2D, doWatch, GameObject, getSlingLoad,
 	getVariable, group, isNull, objNull, player, position, removeAction, setBehaviour, setFuel, setSlingLoad, setVariable,
-	setWaypointType, units, waypoints, crew } from "js-to-sqf"
+	setWaypointType, units, waypoints, crew } from "@paulbarmstrong/js-to-sqf"
 import { getTowns } from "../Server/Towns"
 
 export async function slingRopeAttach(heli: GameObject, rope: any, veh: GameObject) {
