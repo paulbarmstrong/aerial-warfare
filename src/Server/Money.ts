@@ -29,8 +29,8 @@ export function getKillAward(unit: GameObject): number {
 	}).find(x => x !== undefined)
 	if (aircraftPrice !== undefined) return aircraftPrice / 2
 	
-	const slingablePrice = SLINGABLES.find(slingable => slingable.className === unitClassName)?.price
-	if (slingablePrice !== undefined) return slingablePrice / 2
+	const slingable = SLINGABLES.find(slingable => slingable.className === unitClassName)
+	if (slingable !== undefined) return slingable.price / 2
 
 	const awardCategory = UNIT_KILL_AWARD_CATEGORIES.find(x => isKindOf(unit, x.kind))
 	if (awardCategory !== undefined) return awardCategory.money

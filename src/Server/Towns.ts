@@ -1,13 +1,13 @@
-import { addEventHandler, alive, allowDamage, assignAsGunner, attachTo, bis, createGroup, createGroupV2, createMarker, createVehicle, deleteVehicle, distance2D, east, GameObject, getDir, getMarkerColor, getMarkerPos, getVariable, globalChat, group, Group, groupChat, grpNull, gunner, hideObject, independent, leader, markerColor, missionNamespace, moveInGunner, nearestObject, nearestObjects, position, PositionAGLS, publicVariable, remoteExec, setDamage, setDir, setMarkerColor, setMarkerText, setMarkerType, setPos, setVariable, setVectorDir, setVehicleAmmo, side, Side, sleep, spawn, str, TurretPath, west } from "js-to-sqf"
-import { CONTROL_NEARBY_LZ, getMarkerColorForSide, getTownFlagClassNameForSide, INCOME_PER_TOWN_TROOP, INITIAL_OCCUPATION, INITIAL_TOWN_TROOPS_DELAY_SECONDS, MINIMUM_INCOME, RIFLEMEN, TOWN_CAPTURE_AWARD, TOWNS_CONFIG, USE_HITMARKERS, USE_RHS } from "../Constants";
+import { addEventHandler, alive, allowDamage, assignAsGunner, attachTo, bis, createGroupV2, createMarker, createUnit, createVehicle, deleteVehicle, distance2D, east, GameObject, getDir, getMarkerColor, getMarkerPos, getVariable, globalChat, group, Group, groupChat, grpNull, gunner, hideObject, independent, leader, markerColor, missionNamespace, moveInGunner, nearestObject, nearestObjects, position, PositionAGLS, remoteExec, round, setCombatMode, setDamage, setDir, setMarkerColor, setMarkerText, setMarkerType, setPos, setSkill, setVariable, setVectorDir, setVehicleAmmo, side, Side, sleep, spawn, west } from "js-to-sqf"
+import { CONTROL_NEARBY_LZ, getCurrentMod, getMarkerColorForSide, getTownFlagClassNameForSide, INCOME_PER_TOWN_TROOP, INITIAL_OCCUPATION, INITIAL_TOWN_TROOPS_DELAY_SECONDS, MINIMUM_INCOME, RIFLEMEN, TOWN_CAPTURE_AWARD, TOWNS_CONFIG, USE_HITMARKERS } from "../Constants";
 import { Town } from "../Types";
 import { distributeHitmarker } from "./Hit";
 import { changeMoney } from "./Money";
 import { onUnitKilled } from "./EventHandlers";
 
 export function setUpTowns() {
-	setVariable(missionNamespace(), "BluforHelipads", nearestObjects(getMarkerPos("bluforMarker"), ["HeliH"], 200, true))
-	setVariable(missionNamespace(), "OpforHelipads", nearestObjects(getMarkerPos("opforMarker"), ["HeliH"], 200, true))
+	setVariable(missionNamespace(), "BluforHelipads", nearestObjects(getMarkerPos("bluforMarker"), ["HeliH"], 200, true), true)
+	setVariable(missionNamespace(), "OpforHelipads", nearestObjects(getMarkerPos("opforMarker"), ["HeliH"], 200, true), true)
 	const towns: Array<Town> = TOWNS_CONFIG.map((townConfig, townIndex) => {
 		const flagPos: PositionAGLS = position(townConfig.flag)
 
@@ -33,7 +33,9 @@ export function setUpTowns() {
 		const helipad: GameObject = nearestObject(flagPos, "HeliH")
 
 		return {
-			...townConfig,
+			name: townConfig.name,
+			size: townConfig.size,
+			flag: townConfig.flag,
 			marker,
 			helipad,
 			turretHolder,
@@ -42,7 +44,7 @@ export function setUpTowns() {
 		}
 	})
 
-	setVariable(missionNamespace, "Towns", towns, true)
+	setVariable(missionNamespace(), "Towns", towns, true)
 
 	spawn([], putOriginalTownMen)
 }
@@ -68,17 +70,16 @@ function putOriginalTownMen() {
 			{closestTowns: bluforClosestTowns, side: west()},
 			{closestTowns: opforClosestTowns, side: east()}
 		].forEach(entry => {
-			const {closestTowns, side} = entry
-			const town: Town = closestTowns[i]
+			const town: Town = entry.closestTowns[i]
 			if (town.group !== grpNull()) {
-				const {closestTowns, side} = entry
+				const side = entry.side
 				const newGroup: Group = createGroupV2(side, true)
 				town.group = newGroup
 				setCombatMode(newGroup, "RED")
 				town.turrets.forEach(turret => {
-					const riflemanClassName = RIFLEMEN.find(r => r.side === side && r.mod === (USE_RHS ? "RHS" : undefined))!.className
+					const riflemanClassName = RIFLEMEN.find(r => r.side === side && r.mod === getCurrentMod())!.className
 					const newUnit: GameObject = createUnit(newGroup, riflemanClassName, position(turret), [], 0, "NONE")
-					addEventHandler(newUnit, "Killed", onKilled)
+					addEventHandler(newUnit, "Killed", onUnitKilled)
 					if (USE_HITMARKERS) {
 						addEventHandler(newUnit, "Hit", distributeHitmarker)
 					}
@@ -111,7 +112,7 @@ function putOriginalTownMen() {
 
 				for (let j = 0; j < town.turrets.length && j < maxUnits; j++) {
 					const turret: GameObject = town.turrets[j]
-					const riflemanClassName = RIFLEMEN.find(r => r.side === independent() && r.mod === (USE_RHS ? "RHS" : undefined))!.className
+					const riflemanClassName = RIFLEMEN.find(r => r.side === independent() && r.mod === getCurrentMod())!.className
 					const newUnit: GameObject = createUnit(newGroup, riflemanClassName, position(turret), [], 0, "NONE")
 					setSkill(newUnit, 0.2)
 					addEventHandler(newUnit, "Killed", onUnitKilled)
@@ -132,13 +133,16 @@ function onGetInTurret(turret: GameObject, man: GameObject, townIndex: number) {
 	const towns: Array<Town> = getTowns()
 	const town: Town = towns[townIndex]
 	setDamage(man, 0)
-	setVariable(man, "warfare_owner", grpNull)
+	setVariable(man, "warfare_owner", grpNull())
 	refreshTown(town, man)
 }
 
 export function refreshTown(town: Town, newUnit: GameObject | undefined) {
 	const townUnits: Array<GameObject> = town.turrets.map(turret => gunner(turret)).filter(unit => unit !== undefined)
-	const townSide: Side | undefined = townUnits.length > 0 ? side(townUnits[0]) : undefined
+	let townSide: Side | undefined = undefined
+	if (townUnits.length > 0) {
+		townSide = side(townUnits[0])
+	}
 	setMarkerText(town.marker, `${town.name}: ${townUnits.length}/${town.turrets.length}`)
 
 	if (getMarkerColor(town.marker) !== getMarkerColorForSide(townSide)) {
@@ -152,7 +156,7 @@ export function refreshTown(town: Town, newUnit: GameObject | undefined) {
 		town.flag = newFlag
 
 		if (townUnits.length === 0) {
-			town.group = grpNull
+			town.group = grpNull()
 		}
 
 		if (newUnit !== undefined) {
@@ -170,17 +174,17 @@ export function refreshTown(town: Town, newUnit: GameObject | undefined) {
 		setTown(town)
 	}
 
-	const towns: Array<Town> = getVariable(missionNamespace, "Towns")
+	const towns: Array<Town> = getVariable(missionNamespace(), "Towns")
 	const numBluforTownTroops: number = towns
 		.flatMap(town => town.turrets)
-		.filter(turret => alive(gunner(turret)) && side(gunner(turret)) === "west")
+		.filter(turret => alive(gunner(turret)) && side(gunner(turret)) === west())
 		.length
 	const numOpforTownTroops: number = towns
 		.flatMap(town => town.turrets)
-		.filter(turret => alive(gunner(turret)) && side(gunner(turret)) === "east")
+		.filter(turret => alive(gunner(turret)) && side(gunner(turret)) === east())
 		.length
-	setVariable(missionNamespace, "BluforIncome", MINIMUM_INCOME + (numBluforTownTroops * INCOME_PER_TOWN_TROOP), true)
-	setVariable(missionNamespace, "OpforIncome", MINIMUM_INCOME + (numOpforTownTroops * INCOME_PER_TOWN_TROOP), true)
+	setVariable(missionNamespace(), "BluforIncome", MINIMUM_INCOME + (numBluforTownTroops * INCOME_PER_TOWN_TROOP), true)
+	setVariable(missionNamespace(), "OpforIncome", MINIMUM_INCOME + (numOpforTownTroops * INCOME_PER_TOWN_TROOP), true)
 }
 
 export function getTowns(): Array<Town> {

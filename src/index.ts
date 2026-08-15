@@ -1,11 +1,19 @@
-import { addAction, AddActionScript, bis, Config, configFile, createMarker, defineMission, enableSaving, GameObject, group, groupId, groupId, isPlayer, name, playableUnits, player, position, setMarkerColor, setMarkerText, setMarkerType, Side, side, spawn, systemChat, typeOf, vehicle } from "js-to-sqf"
-import { setUpTowns } from "./Towns"
-import { getMarkerColorForSide } from "./Constants"
+import { addEventHandler, addMissionEventHandler, createMarker, defineMission, enableSaving, findDisplay,
+	group, groupId, isNull, isPlayer, missionNamespace, name, playableUnits, player, position, setMarkerColor,
+	setMarkerText, setMarkerType, setVariable, Side, side, spawn, uiNamespace, waitUntil } from "js-to-sqf"
+import { getMarkerColorForSide, MINIMUM_INCOME } from "./Constants"
+import { clientLoop } from "./Client/ClientLoop"
+import { inventoryOpened, playerRespawn } from "./Client/PlayerLocal"
+import { setUpConvoys } from "./Server/Convoy"
+import { serverLoop } from "./Server/Loop"
+import { setUpPlayer } from "./Server/Player"
+import { aiRespawn } from "./Server/Spawn"
+import { setUpTowns } from "./Server/Towns"
 
 export default defineMission({
 	initServer: () => {
 		enableSaving(false)
-		
+
 		setUpTowns()
 
 		playableUnits().forEach(unit => {
@@ -19,88 +27,37 @@ export default defineMission({
 				setMarkerText(newMarker, unitGroupId)
 			}
 			setMarkerColor(newMarker, getMarkerColorForSide(unitSide))
+
+			setUpPlayer(unit)
 		})
-
-		// Initialize playable AI stuff
-		//=========================================
-
-		{	
-			// Add EventHandlers for AI respawn
-			_x addEventHandler ["Respawn","(_this select 0) spawn FNC_AIRespawn;"];
-			_x addEventHandler ["Killed","_this spawn FNC_EntityKilled; _this spawn FNC_DeathMessage;"];
-			if (USE_HITMARKERS) then {
-				_x addEventHandler ["Hit", FNC_DistributeHitmarkers];
-			};
-			(group _x) setVariable["Money", "StartingMoney" call BIS_fnc_getParamValue, true];
-		//	if (name _x == "PULL") then {
-		//		(group _x) setVariable["Money", 200000, true];
-		//	};
-			
-			// Make flag to prevent duplicate AIRespawns
-			(group _x) setVariable ["warfare_need_spawn", true];
-				
-			// Make the LastPosition to deal with ai getting stuck
-			_x setVariable ["LastPosition", position _x];
-			
-		} forEach playableUnits;
-
 
 		// Initialize income/economy stuff
 		//=========================================
 
-		BluforIncome = MINIMUM_INCOME;
-		OpforIncome = MINIMUM_INCOME;
-		publicVariable "BluforIncome";
-		publicVariable "OpforIncome";
+		setVariable(missionNamespace(), "BluforIncome", MINIMUM_INCOME, true)
+		setVariable(missionNamespace(), "OpforIncome", MINIMUM_INCOME, true)
 
 		// Passive Vehicle Convoys
 		//=========================================
 
-		Blufor_Convoy_Groups = [];
-		Opfor_Convoy_Groups = [];
-
-		for "_i" from 0 to (("NumConvoys" call BIS_fnc_getParamValue) - 1) do {
-			Blufor_Convoy_Groups = Blufor_Convoy_Groups + [grpNull];
-			Opfor_Convoy_Groups = Opfor_Convoy_Groups + [grpNull];
-		};
-
-
-		// Create markers for convoys
-		for "_i" from 0 to (count Blufor_Convoy_Groups - 1) do {
-			_newMarkerName = format["blufor_convoy_marker_%1",_i];
-			_newMarker = createMarker[_newMarkerName, [0,0,0]];
-			_newMarker setMarkerType "mil_dot";
-			_newMarker setMarkerColor "colorBLUFOR";
-			_newMarker setMarkerAlpha 0;
-		};
-		for "_i" from 0 to (count Opfor_Convoy_Groups - 1) do {
-			_newMarkerName = format["opfor_convoy_marker_%1",_i];
-			_newMarker = createMarker[_newMarkerName, [0,0,0]];
-			_newMarker setMarkerType "mil_dot";
-			_newMarker setMarkerColor "colorOPFOR";
-			_newMarker setMarkerAlpha 0;
-		};
+		setUpConvoys()
 
 		// Run scripts
 		//=========================================
 
-		BluforIsSpawning = false;
-		OpforIsSpawning = false;
+		spawn([], serverLoop)
 
-		[] spawn FNC_ServerLoop;
-
-		{
-			_x spawn FNC_AIRespawn;
-		} forEach playableUnits;
-
+		playableUnits().forEach(unit => {
+			spawn([unit], aiRespawn)
+		})
 
 		// Mission Event Handlers
 		//=========================================
 
-		addMissionEventHandler ["PlayerDisconnected", {
-			BluforIsSpawning = false;
-			OpforIsSpawning = false;
-		}];
+		addMissionEventHandler("PlayerDisconnected", () => {
+			setVariable(missionNamespace(), "BluforIsSpawning", false, false)
+			setVariable(missionNamespace(), "OpforIsSpawning", false, false)
+		})
 
 		// Plans
 		//=========================================
@@ -111,11 +68,22 @@ export default defineMission({
 		// and it has something to do with playableAI behavior
 
 		// Sometimes LZ gets cleared, shows 0/4, white, no men there, but cannot be captured
-
-
-
-
 	},
 	initPlayerLocal: () => {
+		setVariable(uiNamespace(), "repairState", 2)
+		setVariable(uiNamespace(), "isUnloadingTroops", false)
+		setVariable(uiNamespace(), "hasSetSelection", false)
+		setVariable(uiNamespace(), "trying_to_spawn", false)
+		setVariable(uiNamespace(), "aircraftSelection", 0)
+		setVariable(uiNamespace(), "armamentSelection", 0)
+
+		addEventHandler(player(), "Respawn", () => playerRespawn())
+		addEventHandler(player(), "InventoryOpened", () => inventoryOpened())
+
+		waitUntil(() => !isNull(findDisplay(46)))
+
+		playerRespawn()
+		spawn([], clientLoop)
 	}
 })
+

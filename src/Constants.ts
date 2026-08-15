@@ -3,13 +3,13 @@ import { AircraftConfig, RiflemanConfig, SlingableConfig } from "./Types"
 
 export function getUnitDisplayName(unit: GameObject) {
 	const slingable = SLINGABLES.find(x => x.className === typeOf(unit))
-	if (slingable?.name !== undefined) {
+	if (slingable !== undefined && slingable.name !== undefined) {
 		return slingable.name
 	}
 	return getText(new Config(configFile(), "CfgVehicles", typeOf(unit), "displayName"))
 }
 
-export function getConvoyVehicles(mod: "RHS" | undefined, side: Side): Array<String> {
+export function getConvoyVehicles(mod: "RHS" | undefined, side: Side): Array<string> {
 	if (mod === "RHS") {
 		if (side === west()) {
 			return ["rhsusf_m1025_w_m2", "rhsusf_m1025_w_mk19", "rhsusf_m1025_w_m2"]
@@ -75,10 +75,57 @@ export const INITIAL_TOWN_TROOPS_DELAY_SECONDS = 0.02
 export const INCOME_PER_TOWN_TROOP = bis.getParamValue("TroopIncomeFactor")
 export const USE_HITMARKERS = bis.getParamValue("UseHitmarkers") === 1
 export const USE_RHS = bis.getParamValue("UseRHS") === 1
-export const MODS = USE_RHS ? ["RHS"] : []
+function computeMods(): Array<string> {
+	if (USE_RHS) {
+		return ["RHS"]
+	}
+	return []
+}
+export const MODS = computeMods()
+
+export function getCurrentMod(): "RHS" | undefined {
+	if (USE_RHS) {
+		return "RHS"
+	}
+	return undefined
+}
 export const INITIAL_OCCUPATION = bis.getParamValue("InitialOccupation")
 export const CONTROL_NEARBY_LZ = bis.getParamValue("ControlNearbyLZ")
 export const STARTING_MONEY = bis.getParamValue("StartingMoney")
+export const NUM_CONVOYS = bis.getParamValue("NumConvoys")
+export const INCLUDE_JETS = bis.getParamValue("IncludeJets") === 1
+
+export const BLUFOR_SPAWN_POS: GameObject = getGameObjectByVariableName("bluforSpawnPos")
+export const OPFOR_SPAWN_POS: GameObject = getGameObjectByVariableName("opforSpawnPos")
+export const BLUFOR_JET_SPOT: GameObject = getGameObjectByVariableName("bluforJetSpot")
+export const OPFOR_JET_SPOT: GameObject = getGameObjectByVariableName("opforJetSpot")
+export const BLUFOR_GARAGE: GameObject = getGameObjectByVariableName("bluforGarage")
+export const OPFOR_GARAGE: GameObject = getGameObjectByVariableName("opforGarage")
+
+export function getSpawnPosForSide(side: Side): GameObject {
+	if (side === west()) {
+		return BLUFOR_SPAWN_POS
+	}
+	return OPFOR_SPAWN_POS
+}
+
+export function getJetSpotForSide(side: Side): GameObject {
+	if (side === west()) {
+		return BLUFOR_JET_SPOT
+	}
+	return OPFOR_JET_SPOT
+}
+
+export function getGarageForSide(side: Side): GameObject {
+	if (side === west()) {
+		return BLUFOR_GARAGE
+	}
+	return OPFOR_GARAGE
+}
+
+export function getDefaultRiflemanForSide(side: Side): string {
+	return RIFLEMEN.find(r => r.side === side && r.mod === getCurrentMod())!.className
+}
 
 setVariable(missionNamespace(), "SlingMarkerTally", 0)
 setVariable(missionNamespace(), "SlingMarkerArray", [])
@@ -112,7 +159,7 @@ export const SLINGABLES: Array<SlingableConfig> = [
 	{sides: [east()], mod: "RHS", className: "rhsgref_ins_uaz_spg9", price: 1000, name: "UAZ-3151 (AA)", antiAir: true},
 ]
 					
-const BIG_BOMB_CLASSNAMES = ["Bomb_04_Plane_CAS_01_F", "Bomb_03_Plane_CAS_02_F", "Bomb_04_Plane_CAS_01_F",
+export const BIG_BOMB_CLASSNAMES = ["Bomb_04_Plane_CAS_01_F", "Bomb_03_Plane_CAS_02_F", "Bomb_04_Plane_CAS_01_F",
 	"Bomb_03_Plane_CAS_02_F", "rhs_mag_gbu12", "rhs_mag_fab250"];
 
 export const TEXTURE_REPLACEMENTS = [

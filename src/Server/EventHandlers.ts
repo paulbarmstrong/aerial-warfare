@@ -54,13 +54,13 @@ export async function onUnitKilled(unit: GameObject, killer: GameObject) {
 
 	// Do things if this guy was guarding a base
 	const towns = getTowns()
-	for (const town of towns) {
-		for (const turret of town.turrets) {
+	towns.forEach(town => {
+		town.turrets.forEach(turret => {
 			if (unit === gunner(turret)) {
 				refreshTown(town, undefined)
 			}
-		}
-	}
+		})
+	})
 
 	if (playableUnits().includes(unit)) {
 		setDamage(vehicle(unit), 1)

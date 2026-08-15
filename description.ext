@@ -61,3 +61,4 @@ class Params {
 		default = 20;
 	};
 };
+#include "CfgFunctions.hpp"
