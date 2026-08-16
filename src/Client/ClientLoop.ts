@@ -17,7 +17,7 @@ export async function clientLoop() {
 	while (true) {
 		displayHUDText()
 
-		if (vehicle(player()) !== player() && getVariable(uiNamespace(), "isUnloadingTroops")) {
+		if (vehicle(player()) !== player() && (getVariable(uiNamespace(), "isUnloadingTroops") ?? false)) {
 			remoteExec([vehicle(player()), "touching_ground", isTouchingGround(vehicle(player()))], setVariable, 2, false)
 		}
 
@@ -34,7 +34,7 @@ export async function clientLoop() {
 				isNearServiceLoc = true
 			}
 		})
-		if (isNearServiceLoc && isTouchingGround(vehicle(player())) && getVariable(uiNamespace(), "repairState") === 0) {
+		if (isNearServiceLoc && isTouchingGround(vehicle(player())) && (getVariable(uiNamespace(), "repairState") ?? 0) === 0) {
 			setVariable(uiNamespace(), "repairState", 1)
 			spawn([], helipadService)
 		}
@@ -47,7 +47,7 @@ export async function clientLoop() {
 			towns.forEach((town, i) => {
 				if (isTouchingGround(vehicle(player())) && vectorMagnitude(velocity(vehicle(player()))) < 3
 						&& distance2D(position(player()), position(town.flag)) < town.size
-						&& !getVariable(uiNamespace(), "isUnloadingTroops")) {
+						&& !(getVariable(uiNamespace(), "isUnloadingTroops") ?? false)) {
 					setVariable(uiNamespace(), "isUnloadingTroops", true)
 					remoteExec([player(), i], letTroopsOut, 2, false)
 				}

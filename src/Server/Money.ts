@@ -1,4 +1,4 @@
-import { GameObject, getVariable, group, grpNull, isKindOf, setVariable, str, systemChat, typeOf } from "@paulbarmstrong/js-to-sqf";
+import { GameObject, getVariable, group, grpNull, isKindOf, missionNamespace, setVariable, Side, typeOf, west } from "@paulbarmstrong/js-to-sqf";
 import { AIRCRAFT, LZ_KILL_AWARD, SLINGABLES, UNIT_KILL_AWARD_CATEGORIES } from "../Constants";
 import { getTowns } from "./Towns";
 
@@ -36,4 +36,9 @@ export function getKillAward(unit: GameObject): number {
 	if (awardCategory !== undefined) return awardCategory.money
 
 	return 0
+}
+
+export function getIncome(side: Side): number {
+	const incomeVariableName: string = side === west() ? "BluforIncome" : "OpforIncome"
+	return getVariable(missionNamespace(), incomeVariableName)
 }

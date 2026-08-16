@@ -28,7 +28,7 @@ export async function updateWaypoint(group: Group) {
 	const groupSide = side(group)
 	const maxTroops = bis.crewCount(typeOf(heli), true) - bis.crewCount(typeOf(heli), false)
 	const isTransportHeli = maxTroops > 0
-	const troopCount = fullCrew(heli).filter(entry => entry[0] !== objNull() && getVariable(entry[0], "SoldierType") === "capture").length
+	const troopCount = fullCrew(heli).filter(entry => entry[0] !== objNull() && (getVariable(entry[0], "SoldierType") ?? "") === "capture").length
 
 	const homePos = position(getSpawnPosForSide(groupSide))
 

@@ -3,7 +3,7 @@ import { alive, Config, configFile, deleteMarker, distance2D, east, GameObject, 
 	playableUnits, position, remoteExec, setBehaviour, setDamage, setMarkerAlpha, setMarkerPos, setMarkerText,
 	setVariable, side, sleep, spawn, typeOf, units, vehicle, west } from "@paulbarmstrong/js-to-sqf"
 import { getConvoyGroupsForSide, updateConvoyWaypoint } from "./Convoy"
-import { changeMoney } from "./Money"
+import { changeMoney, getIncome } from "./Money"
 import { getTowns } from "./Towns"
 import { updateWaypoint } from "./Waypoint"
 
@@ -129,10 +129,7 @@ export async function serverLoop() {
 		// Award income every 60 seconds
 		if (count % 60 === 0) {
 			playableUnits().forEach(unit => {
-				let income = getVariable(missionNamespace(), "OpforIncome")
-				if (side(group(unit)) === west()) {
-					income = getVariable(missionNamespace(), "BluforIncome")
-				}
+				const income = getIncome(side(group(unit)))
 				if (income > 0) {
 					remoteExec([unit, `Income from town occupation | +$${income}`], groupChat, unit, false)
 					changeMoney(unit, income)

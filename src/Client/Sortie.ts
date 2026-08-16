@@ -1,5 +1,5 @@
 import { alive, closeDialog, Config, configFile, Control, createDialog, crew, ctrlSetStructuredText, ctrlSetTextColor,
-	ctrlSetTextV2, deleteVehicle, Display, displayAddEventHandler, displayCtrl, displayRemoveEventHandler, distance2D,
+	ctrlSetTextV2, deleteVehicle, diag_log, Display, displayAddEventHandler, displayCtrl, displayRemoveEventHandler, distance2D,
 	findDisplay, fullCrew, GameObject, getPosASL, getSlingLoad, getText, getVariable, group, groupChat, hideObjectV2, hint,
 	isNull, isPlayer, lbAddV2, lbClearV2, lbCurSelV2, lbSetCurSelV2, lbTextV2, missionNamespace, parseText, player,
 	remoteExec, removeAllActions, removeAllWeapons, setDamage, setPosASL, setVariable, setVelocity, side, sleep, spawn,
@@ -8,6 +8,7 @@ import { AIRCRAFT, getUnitDisplayName, MOD, SLINGABLES } from "../Constants"
 import { AircraftConfig, SlingableConfig } from "../Types"
 import { changeMoney } from "../Server/Money"
 import { spawnPlayerAircraft } from "../Server/Spawn"
+import { getPlayerMoney } from "./Money"
 
 const SORTIE_DISPLAY_ID = 8366
 
@@ -66,8 +67,8 @@ export async function sortie() {
 		}
 	})
 
-	if (getVariable(vehicle(player()), "price") !== undefined) {
-		const reimbursement = getVariable(vehicle(player()), "price")
+	const reimbursement: number = getVariable(vehicle(player()), "price") ?? -1
+	if (reimbursement >= 0) {
 		remoteExec([player(), reimbursement], changeMoney, player(), false)
 		groupChat(player(), `Aircraft refunded | +$${reimbursement}`)
 
@@ -137,7 +138,7 @@ export async function heliSelChanged() {
 			lbAddV2(armaListControl(), `${armament.name} ($${armament.price})`)
 		})
 
-		if (!getVariable(uiNamespace(), "hasSetSelection")) {
+		if ((getVariable(uiNamespace(), "hasSetSelection") ?? false) === false) {
 			lbSetCurSelV2(armaListControl(), getVariable(uiNamespace(), "armamentSelection"))
 			setVariable(uiNamespace(), "hasSetSelection", true)
 		} else {
@@ -145,7 +146,7 @@ export async function heliSelChanged() {
 		}
 
 		ctrlSetTextV2(spawnButtonControl(), `Spawn in the ${aircraft.name} for $${aircraft.price}`)
-		if (getVariable(group(player()), "Money") >= aircraft.price) {
+		if (getPlayerMoney() >= aircraft.price) {
 			ctrlSetTextColor(spawnButtonControl(), [1, 1, 1, 1])
 		} else {
 			ctrlSetTextColor(spawnButtonControl(), [0.5, 0.5, 0.5, 1])
@@ -179,7 +180,7 @@ export async function armaSelChanged() {
 
 		const totalPrice = aircraft.price + armament.price
 		ctrlSetTextV2(spawnButtonControl(), `Spawn in the ${aircraft.name} for $${totalPrice}`)
-		if (getVariable(group(player()), "Money") >= totalPrice) {
+		if (getPlayerMoney() >= totalPrice) {
 			ctrlSetTextColor(spawnButtonControl(), [1, 1, 1, 1])
 		} else {
 			ctrlSetTextColor(spawnButtonControl(), [0.5, 0.5, 0.5, 1])
@@ -208,7 +209,7 @@ export async function slingSelChanged() {
 		const totalPrice = aircraft.price + armament.price + slingPrice
 
 		ctrlSetTextV2(spawnButtonControl(), `Spawn in the ${aircraft.name} for $${totalPrice}`)
-		if (getVariable(group(player()), "Money") >= totalPrice) {
+		if (getPlayerMoney() >= totalPrice) {
 			ctrlSetTextColor(spawnButtonControl(), [1, 1, 1, 1])
 		} else {
 			ctrlSetTextColor(spawnButtonControl(), [0.5, 0.5, 0.5, 1])
@@ -238,7 +239,7 @@ export async function spawnButtonPressed() {
 		}
 		const totalPrice = aircraft.price + armament.price + slingPrice
 
-		if (getVariable(group(player()), "Money") >= totalPrice) {
+		if (getPlayerMoney() >= totalPrice) {
 			remoteExec([player(), -totalPrice], changeMoney, player(), false)
 			displayRemoveEventHandler(sortieDisplay(), "KeyDown", getVariable(uiNamespace(), "escapeHandler"))
 			closeDialog(0)

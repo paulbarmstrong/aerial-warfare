@@ -1,7 +1,7 @@
 import { action, addBackpack, addEventHandler, addMagazineTurret, addWeaponTurret, allowCrewInImmobile, allowDamage,
 	allTurrets, assignAsCargo, assignAsDriver, assignAsGunner, bis, Config, configFile, createGroupV2, createMarker,
-	createUnit, createVehicleCrew, createVehicleV2, deleteVehicle, distance2D, fullCrew, GameObject, getDir,
-	getPosASL, getText, getVariable, globalChat, group, Group, groupChat, gunner, hideObjectV2, isKindOfV2, isPlayer,
+	createUnit, createVehicleCrew, createVehicleV2, deleteVehicle, diag_log, distance2D, fullCrew, GameObject, getDir,
+	getPosASL, getText, getVariable, globalChat, group, Group, groupChat, grpNull, gunner, hideObjectV2, isKindOfV2, isPlayer,
 	isTouchingGround, joinSilent, land, lock, missionNamespace, moveInCargo, moveInDriver, moveOut, name, nearestObjects, orderGetIn,
 	owner, playableUnits, playSound, position, remoteExec, removeAllActions, removeWeaponTurret, setBehaviour, setCombatMode,
 	setDir, setGroupOwner, setMarkerAlpha, setMarkerColor, setMarkerText, setMarkerType, setObjectTexture, setPosASL,
@@ -88,9 +88,9 @@ function onHeliFired(unit: GameObject, weapon: string, muzzle: string, mode: str
 export async function aiRespawn(man: GameObject) {
 	const grp = group(man)
 	const respawnSide = side(grp)
-	const needSpawn: boolean | undefined = getVariable(grp, "warfare_need_spawn")
+	const needSpawn: boolean = getVariable(grp, "warfare_need_spawn") ?? false
 
-	if (isPlayer(man) || !playableUnits().includes(man) || needSpawn === undefined || !needSpawn) return
+	if (isPlayer(man) || !playableUnits().includes(man) || !needSpawn) return
 	setVariable(grp, "warfare_need_spawn", false)
 
 	const helipads: Array<GameObject> = getVariable(missionNamespace(), respawnSide === west() ? "BluforHelipads" : "OpforHelipads")
@@ -197,7 +197,7 @@ export async function aiLandAtBase(man: GameObject) {
 	const grp = group(man)
 	const heli = vehicle(man)
 
-	if (playableUnits().includes(man) && !getVariable(grp, "lettingOutTroops") && !getVariable(grp, "landingAtBase")) {
+	if (playableUnits().includes(man) && !(getVariable(grp, "lettingOutTroops") ?? false) && !(getVariable(grp, "landingAtBase") ?? false)) {
 		setVariable(grp, "landingAtBase", true)
 
 		land(heli, "LAND")
@@ -209,7 +209,7 @@ export async function aiLandAtBase(man: GameObject) {
 		}
 
 		hideObjectV2(man, false)
-		remoteExec([man, getVariable(heli, "price")], changeMoney, man, false)
+		remoteExec([man, getVariable(heli, "price") ?? 0], changeMoney, man, false)
 		const crewMembers: Array<GameObject> = fullCrew(heli).map(entry => entry[0]).filter(u => u !== undefined)
 		deleteVehicle(heli)
 		crewMembers.forEach(crewMember => {
@@ -230,7 +230,7 @@ async function letOutCargoTroopsAtTown(player: GameObject, townIndex: number, aw
 	const town = towns[townIndex]
 
 	const cargoCrew: Array<GameObject> = fullCrew(heli).map(entry => entry[0])
-		.filter(u => u !== undefined && getVariable(u, "SoldierType") === "capture")
+		.filter(u => u !== undefined && (getVariable(u, "SoldierType") ?? "") === "capture")
 
 	let turretSlotIndex = 0
 	let heliManIndex = 0
@@ -439,4 +439,8 @@ export async function spawnPlayerAircraft(player: GameObject, heliIndex: number,
 	remoteExec([`${name(player)}[${genericHeliName}] spawned`], globalChat, 0, false)
 
 	setVariable(missionNamespace(), isSpawningVarName, false, false)
+}
+
+export function getWarfareOwnerGroup(unit: GameObject): Group {
+	return getVariable(unit, "warfare_owner") ?? grpNull
 }

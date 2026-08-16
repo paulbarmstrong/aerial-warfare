@@ -3,6 +3,7 @@ import { displayHitmarker } from "../Client/Hitmarker";
 import { getUnitDisplayName } from "../Constants";
 import { changeMoney, getKillAward } from "./Money";
 import { getTowns, refreshTown } from "./Towns";
+import { getWarfareOwnerGroup } from "./Spawn";
 
 export async function distributeHitmarker(unit: GameObject, hitter: GameObject) {
 	if (isPlayer(driver(vehicle(hitter))) && side(group(hitter)) !== side(group(unit))) {
@@ -13,8 +14,8 @@ export async function distributeHitmarker(unit: GameObject, hitter: GameObject) 
 export async function onUnitKilled(unit: GameObject, killer: GameObject) {
 	const unitSide: Side = side(group(unit))
 	const killerSide: Side = side(group(killer))
-	const warfarOwnerGroup: Group | undefined = getVariable(killer, "warfare_owner")
-	const killerOwner: GameObject = warfarOwnerGroup !== undefined ? leader(warfarOwnerGroup) : objNull()
+	const warfarOwnerGroup: Group = getWarfareOwnerGroup(killer)
+	const killerOwner: GameObject = leader(warfarOwnerGroup)
 	const hasBeenHandled: boolean | undefined = getVariable(unit, "death_has_been_handled")
 	if (killerOwner !== undefined && hasBeenHandled === undefined) {
 		setVariable(unit, "death_has_been_handled", true)
@@ -46,8 +47,8 @@ export async function onUnitKilled(unit: GameObject, killer: GameObject) {
 			const owner = driver(vehicle(killer))
 			remoteExec([owner, `Neutralized enemy ${unitDisplayName} | +$${award}`], groupChat, owner, false)
 			changeMoney(owner, award)
-		} else if (playableUnits().includes(leader(getVariable(killer, "warfare_owner")))) {
-			const owner = leader(getVariable(killer, "warfare_owner"))
+		} else if (playableUnits().includes(leader(getWarfareOwnerGroup(killer)))) {
+			const owner = leader(getWarfareOwnerGroup(killer))
 			remoteExec([owner, `Your ${killerDisplayName} neutralized an enemy ${unitDisplayName} | +$${award}`], groupChat, owner, false)
 			changeMoney(owner, award)
 		}
@@ -68,7 +69,7 @@ export async function onUnitKilled(unit: GameObject, killer: GameObject) {
 	}
 
 	// If they were someone's car, let them know it got destroyed
-	const carOwner: GameObject = leader(getVariable(unit, "warfare_owner"))
+	const carOwner: GameObject = leader(getWarfareOwnerGroup(unit))
 	if (carOwner !== undefined && (isKindOf(unit, "Tank") || isKindOf(unit, "Car"))) {
 		const carName: string = getText(new Config(configFile(), "CfgVehicles", typeOf(vehicle(unit)), "displayName"))
 		remoteExec([carOwner, `Your ${carName} was destroyed.`], groupChat, carOwner, false)

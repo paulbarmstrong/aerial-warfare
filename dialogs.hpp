@@ -74,7 +74,7 @@ class Sortie_Dialog
 			colorSelectBackground[] = {0,0.5,1,0.6};
 			colorSelectBackground2[] = {0,0.5,1,0.6};
 			
-			onLBSelChanged = [] spawn FNC_HeliSelChanged;
+			onLBSelChanged = [] spawn JS_fnc_heliSelChanged_76026a11;
 		};
 		class VehicleListTitle: RscStructuredText
 		{
@@ -105,7 +105,7 @@ class Sortie_Dialog
 			colorSelectBackground[] = {0,0.5,1,0.6};
 			colorSelectBackground2[] = {0,0.5,1,0.6};
 			
-			onLBSelChanged = [] spawn FNC_ArmaSelChanged;
+			onLBSelChanged = [] spawn JS_fnc_armaSelChanged_a0494282;
 		};
 		class ArmamentListTitle: RscStructuredText
 		{
@@ -135,7 +135,7 @@ class Sortie_Dialog
 			colorSelectBackground[] = {0,0.5,1,0.6};
 			colorSelectBackground2[] = {0,0.5,1,0.6};
 			
-			onLBSelChanged = [] spawn FNC_SlingSelChanged;
+			onLBSelChanged = [] spawn JS_fnc_slingSelChanged_7fbc9e32;
 		};
 		class SlingListTitle: RscStructuredText
 		{
@@ -158,7 +158,7 @@ class Sortie_Dialog
 			w = 0.5053135 * safezoneW;
 			h = 0.05 * safezoneH;
 			colorBackground[] = {0,0,0,0.6};
-			action = [] spawn FNC_SpawnButtonPressed;
+			action = [] spawn JS_fnc_spawnButtonPressed_09109121;
 		};
 	};
 }

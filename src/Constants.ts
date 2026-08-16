@@ -100,15 +100,17 @@ export function getSpawnPosForSide(side: Side): GameObject {
 export function getJetSpotForSide(side: Side): GameObject {
 	if (side === west()) {
 		return BLUFOR_JET_SPOT
+	} else {
+		return OPFOR_JET_SPOT
 	}
-	return OPFOR_JET_SPOT
 }
 
 export function getGarageForSide(side: Side): GameObject {
 	if (side === west()) {
 		return BLUFOR_GARAGE
+	} else {
+		return OPFOR_GARAGE
 	}
-	return OPFOR_GARAGE
 }
 
 export function getDefaultRiflemanForSide(side: Side): string {

@@ -8,6 +8,7 @@ import { displayHitmarker } from "../Client/Hitmarker"
 import { BIG_BOMB_CLASSNAMES } from "../Constants"
 import { onUnitKilled } from "./EventHandlers"
 import { changeMoney } from "./Money"
+import { getWarfareOwnerGroup } from "./Spawn"
 
 export async function keepEngineAlive(vehicle: GameObject) {
 	const info: Array<any> = getAllHitPointsDamage(vehicle)
@@ -91,7 +92,7 @@ export async function removeAfterMinute(vehicle: GameObject) {
 
 export async function addAssistMember(veh: GameObject, hitter: GameObject) {
 	const hitterVeh = vehicle(hitter)
-	let assistOwner: GameObject = leader(getVariable(hitterVeh, "warfare_owner"))
+	let assistOwner: GameObject = leader(getWarfareOwnerGroup(hitterVeh))
 	if (isPlayer(driver(hitterVeh))) {
 		assistOwner = driver(hitterVeh)
 	}
@@ -127,7 +128,7 @@ export async function getOutPunish(veh: GameObject, role: string, man: GameObjec
 	sleep(0.5)
 
 	if (!isObjectHidden(man) && !isPlayer(man) && vehicle(man) === man && veh !== objNull()) {
-		const soldierType: string | undefined = getVariable(man, "SoldierType")
+		const soldierType: string = getVariable(man, "SoldierType") ?? ""
 		if (soldierType === "capture") {
 			remoteExec([man], unassignVehicle, veh, false)
 			remoteExec([man, veh], assignAsCargo, veh, false)
@@ -168,8 +169,8 @@ export async function vehicleKilled(veh: GameObject, killer: GameObject) {
 				const owner = driver(vehicle(killer))
 				remoteExec([owner, `Neutralized ${killCount}x enemy occupants | +$${award}`], groupChat, owner, false)
 				changeMoney(owner, award)
-			} else if (playableUnits().includes(leader(getVariable(killer, "warfare_owner")))) {
-				const owner = leader(getVariable(killer, "warfare_owner"))
+			} else if (playableUnits().includes(leader(getWarfareOwnerGroup(killer)))) {
+				const owner = leader(getWarfareOwnerGroup(killer))
 				const killerDisplayName = getText(new Config(configFile(), "CfgVehicles", typeOf(vehicle(killer)), "displayName"))
 				remoteExec([owner, `Your ${killerDisplayName} neutralized ${killCount}x enemy occupants | +$${award}`], groupChat, owner, false)
 				changeMoney(owner, award)

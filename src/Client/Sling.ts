@@ -58,7 +58,7 @@ export async function updateSlingWaypoint(heli: GameObject, rope: any, veh: Game
 			}
 		})
 
-		const rollOut = getVariable(veh, "roll_out")
+		const rollOut = getVariable(veh, "roll_out") ?? false
 
 		if (rollOut) {
 			setFuel(veh, 1)

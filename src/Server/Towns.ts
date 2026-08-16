@@ -4,6 +4,7 @@ import { Town } from "../Types";
 import { distributeHitmarker } from "./Hit";
 import { changeMoney } from "./Money";
 import { onUnitKilled } from "./EventHandlers";
+import { getWarfareOwnerGroup } from "./Spawn";
 
 export function setUpTowns() {
 	setVariable(missionNamespace(), "BluforHelipads", nearestObjects(getMarkerPos("bluforMarker"), ["HeliH"], 200, true), true)
@@ -174,7 +175,7 @@ export function refreshTown(town: Town, newUnit: GameObject) {
 		}
 
 		if (newUnit !== objNull()) {
-			const owner: GameObject = leader(getVariable(newUnit, "warfare_owner"))
+			const owner: GameObject = leader(getWarfareOwnerGroup(newUnit))
 			remoteExec([owner, `Captured ${town.name} | +$${TOWN_CAPTURE_AWARD}`], groupChat, owner, false)
 			changeMoney(owner, TOWN_CAPTURE_AWARD)
 			remoteExec([newUnit, `${town.name} has been captured by the ${townSide}`], globalChat, undefined, true)
