@@ -1,4 +1,4 @@
-import { alive, bis, fullCrew, getVariable, group, missionNamespace, player, safeZoneX, side, vehicle, west } from "@paulbarmstrong/js-to-sqf"
+import { alive, bis, fullCrew, getVariable, group, missionNamespace, objNull, player, safeZoneX, side, vehicle, west } from "@paulbarmstrong/js-to-sqf"
 import { getPlayerMoney } from "./Money"
 import { getIncome } from "../Server/Money"
 
@@ -7,7 +7,7 @@ export async function displayHUDText() {
 	const income: number = getIncome(side(group(player())))
 
 	const numCapMen = fullCrew(vehicle(player())).map(entry => entry[0])
-		.filter(u => u !== undefined && (getVariable(u, "SoldierType") ?? "") === "capture" && alive(u)).length
+		.filter(u => u !== objNull() && (getVariable(u, "SoldierType") ?? "") === "capture" && alive(u)).length
 
 	const text = `<t align='left'>Money: $${money} (+$${income}/min)<br />Troops: ${numCapMen}</t>`
 

@@ -146,13 +146,13 @@ export async function getOutPunish(veh: GameObject, role: string, man: GameObjec
 export async function vehicleKilled(veh: GameObject, killer: GameObject) {
 	const killerSide = side(group(killer))
 
-	const crewMembers: Array<GameObject> = fullCrew(veh).map((entry: Array<any>) => entry[0]).filter((u: GameObject) => u !== undefined)
+	const crewMembers: Array<GameObject> = fullCrew(veh).map((entry: Array<any>) => entry[0]).filter((u: GameObject) => u !== objNull())
 	if (crewMembers.length > 0) {
 		const unitSide = side(group(crewMembers[0]))
 		let killCount = 0
 		crewMembers.forEach(member => {
-			const hasBeenHandled: boolean | undefined = getVariable(member, "death_has_been_handled")
-			if (hasBeenHandled === undefined || !hasBeenHandled) {
+			const hasBeenHandled: boolean = getVariable(member, "death_has_been_handled") ??  false
+			if (!hasBeenHandled) {
 				setVariable(member, "death_has_been_handled", true)
 				allowDamage(member, true)
 				remoteExec([member, true], allowDamage, member, false)

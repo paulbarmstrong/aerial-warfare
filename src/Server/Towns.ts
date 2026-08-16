@@ -178,7 +178,7 @@ export function refreshTown(town: Town, newUnit: GameObject) {
 			const owner: GameObject = leader(getWarfareOwnerGroup(newUnit))
 			remoteExec([owner, `Captured ${town.name} | +$${TOWN_CAPTURE_AWARD}`], groupChat, owner, false)
 			changeMoney(owner, TOWN_CAPTURE_AWARD)
-			remoteExec([newUnit, `${town.name} has been captured by the ${townSide}`], globalChat, undefined, true)
+			remoteExec([newUnit, `${town.name} has been captured by the ${townSide}`], globalChat, 0, true)
 		}
 
 		// If all towns are friendly, the mission should end

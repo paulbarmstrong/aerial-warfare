@@ -1,5 +1,5 @@
 import { alive, Config, configFile, deleteMarker, distance2D, east, GameObject, getPosASL, getPosATL, getText,
-	getVariable, group, groupChat, groupId, gunner, isPlayer, leader, missionNamespace, moveInGunner, name, orderGetIn,
+	getVariable, group, groupChat, groupId, gunner, isPlayer, leader, missionNamespace, moveInGunner, name, objNull, orderGetIn,
 	playableUnits, position, remoteExec, setBehaviour, setDamage, setMarkerAlpha, setMarkerPos, setMarkerText,
 	setVariable, side, sleep, spawn, typeOf, units, vehicle, west } from "@paulbarmstrong/js-to-sqf"
 import { getConvoyGroupsForSide, updateConvoyWaypoint } from "./Convoy"
@@ -115,7 +115,7 @@ export async function serverLoop() {
 			const town = towns[count % towns.length]
 			town.turrets.forEach(turret => {
 				const turretGunner = gunner(turret)
-				if (turretGunner !== undefined && alive(turretGunner) && vehicle(turretGunner) !== turret) {
+				if (turretGunner !== objNull() && alive(turretGunner) && vehicle(turretGunner) !== turret) {
 					setDamage(turretGunner, 0)
 					orderGetIn([turretGunner], true)
 					if (distance2D(turretGunner, turret) < 5) {

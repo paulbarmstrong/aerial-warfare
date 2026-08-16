@@ -2,7 +2,7 @@ import { action, addBackpack, addEventHandler, addMagazineTurret, addWeaponTurre
 	allTurrets, assignAsCargo, assignAsDriver, assignAsGunner, bis, Config, configFile, createGroupV2, createMarker,
 	createUnit, createVehicleCrew, createVehicleV2, deleteVehicle, diag_log, distance2D, fullCrew, GameObject, getDir,
 	getPosASL, getText, getVariable, globalChat, group, Group, groupChat, grpNull, gunner, hideObjectV2, isKindOfV2, isPlayer,
-	isTouchingGround, joinSilent, land, lock, missionNamespace, moveInCargo, moveInDriver, moveOut, name, nearestObjects, orderGetIn,
+	isTouchingGround, joinSilent, land, lock, missionNamespace, moveInCargo, moveInDriver, moveOut, name, nearestObjects, objNull, orderGetIn,
 	owner, playableUnits, playSound, position, remoteExec, removeAllActions, removeWeaponTurret, setBehaviour, setCombatMode,
 	setDir, setGroupOwner, setMarkerAlpha, setMarkerColor, setMarkerText, setMarkerType, setObjectTexture, setPosASL,
 	setSlingLoad, setVariable, setVehicleAmmo, setVehicleLock, side, Side, sleep, spawn, systemChat, unassignVehicle, units, vectorAdd,
@@ -133,8 +133,8 @@ export async function aiRespawn(man: GameObject) {
 	createVehicleCrew(heli)
 	fullCrew(heli).forEach(entry => {
 		const crewMember: GameObject = entry[0]
-		if (crewMember !== undefined) {
-			if (entry[3] === "Driver") {
+		if (crewMember !== objNull()) {
+			if (entry[1] === "driver") {
 				deleteVehicle(crewMember)
 			} else {
 				allowDamage(crewMember, false)
@@ -163,7 +163,7 @@ export async function aiRespawn(man: GameObject) {
 
 	fullCrew(heli).forEach(entry => {
 		const crewMember: GameObject = entry[0]
-		if (crewMember !== undefined && crewMember !== man) {
+		if (crewMember !== objNull() && crewMember !== man) {
 			attachCrewEventHandlers(crewMember, grp)
 			joinSilent([crewMember], grp)
 		}
@@ -209,8 +209,9 @@ export async function aiLandAtBase(man: GameObject) {
 		}
 
 		hideObjectV2(man, false)
-		remoteExec([man, getVariable(heli, "price") ?? 0], changeMoney, man, false)
-		const crewMembers: Array<GameObject> = fullCrew(heli).map(entry => entry[0]).filter(u => u !== undefined)
+		const heliPrice: number = getVariable(heli, "price") ?? 0
+		remoteExec([man, heliPrice], changeMoney, man, false)
+		const crewMembers: Array<GameObject> = fullCrew(heli).map(entry => entry[0]).filter(u => u !== objNull())
 		deleteVehicle(heli)
 		crewMembers.forEach(crewMember => {
 			if (!playableUnits().includes(crewMember)) {
@@ -230,12 +231,12 @@ async function letOutCargoTroopsAtTown(player: GameObject, townIndex: number, aw
 	const town = towns[townIndex]
 
 	const cargoCrew: Array<GameObject> = fullCrew(heli).map(entry => entry[0])
-		.filter(u => u !== undefined && (getVariable(u, "SoldierType") ?? "") === "capture")
+		.filter(u => u !== objNull() && (getVariable(u, "SoldierType") ?? "") === "capture")
 
 	let turretSlotIndex = 0
 	let heliManIndex = 0
 	while (heliManIndex < cargoCrew.length && turretSlotIndex < town.turrets.length) {
-		while (turretSlotIndex < town.turrets.length && gunner(town.turrets[turretSlotIndex]) !== undefined) {
+		while (turretSlotIndex < town.turrets.length && gunner(town.turrets[turretSlotIndex]) !== objNull()) {
 			turretSlotIndex += 1
 		}
 		if (turretSlotIndex < town.turrets.length) {
@@ -337,7 +338,7 @@ export async function spawnPlayerAircraft(player: GameObject, heliIndex: number,
 
 	fullCrew(heli).forEach(entry => {
 		const crewMember: GameObject = entry[0]
-		if (crewMember !== undefined && !isPlayer(crewMember)) {
+		if (crewMember !== objNull() && !isPlayer(crewMember)) {
 			attachCrewEventHandlers(crewMember, group(player))
 			addEventHandler(crewMember, "Hit", distributeHitmarker)
 		}
