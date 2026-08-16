@@ -4,7 +4,7 @@ import { alive, closeDialog, Config, configFile, Control, createDialog, crew, ct
 	isNull, isPlayer, lbAddV2, lbClearV2, lbCurSelV2, lbSetCurSelV2, lbTextV2, missionNamespace, parseText, player,
 	remoteExec, removeAllActions, removeAllWeapons, setDamage, setPosASL, setVariable, setVelocity, side, sleep, spawn,
 	typeOf, uiNamespace, vehicle, waitUntil, west } from "@paulbarmstrong/js-to-sqf"
-import { AIRCRAFT, getCurrentMod, getUnitDisplayName, SLINGABLES } from "../Constants"
+import { AIRCRAFT, getUnitDisplayName, MOD, SLINGABLES } from "../Constants"
 import { AircraftConfig, SlingableConfig } from "../Types"
 import { changeMoney } from "../Server/Money"
 import { spawnPlayerAircraft } from "../Server/Spawn"
@@ -28,11 +28,11 @@ function spawnButtonControl(): Control {
 }
 
 function getAircraftForSide(playerSide: any): Array<AircraftConfig> {
-	return AIRCRAFT.filter(a => a.sides.includes(playerSide) && a.mod === getCurrentMod())
+	return AIRCRAFT.filter(a => a.sides.includes(playerSide) && a.mod === MOD)
 }
 
 function getSlingablesForSide(playerSide: any): Array<SlingableConfig> {
-	return SLINGABLES.filter(s => s.sides.includes(playerSide) && s.mod === getCurrentMod())
+	return SLINGABLES.filter(s => s.sides.includes(playerSide) && s.mod === MOD)
 }
 
 function getSlingableDisplayName(slingable: SlingableConfig): string {
@@ -250,7 +250,7 @@ export async function spawnButtonPressed() {
 			setVariable(uiNamespace(), "armamentSelection", armaIndex)
 			setVariable(uiNamespace(), "hasSetSelection", false)
 
-			if (aircraft.jet) {
+			if (aircraft.jet ?? false) {
 				sleep(10)
 			} else {
 				sleep(5)

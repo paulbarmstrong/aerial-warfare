@@ -1,4 +1,4 @@
-import { Config, configFile, driver, GameObject, getDammage, getText, getVariable, group, groupChat, gunner, isKindOf, isNil, isPlayer, leader, playableUnits, remoteExec, setDamage, setVariable, Side, side, typeOf, vehicle } from "@paulbarmstrong/js-to-sqf";
+import { Config, configFile, driver, GameObject, getDammage, getText, getVariable, Group, group, groupChat, gunner, isKindOf, isNil, isPlayer, leader, objNull, playableUnits, remoteExec, setDamage, setVariable, Side, side, typeOf, vehicle } from "@paulbarmstrong/js-to-sqf";
 import { displayHitmarker } from "../Client/Hitmarker";
 import { getUnitDisplayName } from "../Constants";
 import { changeMoney, getKillAward } from "./Money";
@@ -13,8 +13,9 @@ export async function distributeHitmarker(unit: GameObject, hitter: GameObject) 
 export async function onUnitKilled(unit: GameObject, killer: GameObject) {
 	const unitSide: Side = side(group(unit))
 	const killerSide: Side = side(group(killer))
-	const killerOwner: GameObject = leader(getVariable(killer, "warfare_owner"))
-	const hasBeenHandled: boolean = getVariable(unit, "death_has_been_handled")
+	const warfarOwnerGroup: Group | undefined = getVariable(killer, "warfare_owner")
+	const killerOwner: GameObject = warfarOwnerGroup !== undefined ? leader(warfarOwnerGroup) : objNull()
+	const hasBeenHandled: boolean | undefined = getVariable(unit, "death_has_been_handled")
 	if (killerOwner !== undefined && hasBeenHandled === undefined) {
 		setVariable(unit, "death_has_been_handled", true)
 	}
@@ -57,7 +58,7 @@ export async function onUnitKilled(unit: GameObject, killer: GameObject) {
 	towns.forEach(town => {
 		town.turrets.forEach(turret => {
 			if (unit === gunner(turret)) {
-				refreshTown(town, undefined)
+				refreshTown(town, objNull())
 			}
 		})
 	})

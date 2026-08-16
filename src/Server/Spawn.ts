@@ -5,19 +5,30 @@ import { action, addBackpack, addEventHandler, addMagazineTurret, addWeaponTurre
 	isTouchingGround, joinSilent, land, lock, missionNamespace, moveInCargo, moveInDriver, moveOut, name, nearestObjects, orderGetIn,
 	owner, playableUnits, playSound, position, remoteExec, removeAllActions, removeWeaponTurret, setBehaviour, setCombatMode,
 	setDir, setGroupOwner, setMarkerAlpha, setMarkerColor, setMarkerText, setMarkerType, setObjectTexture, setPosASL,
-	setSlingLoad, setVariable, setVehicleAmmo, setVehicleLock, side, Side, sleep, spawn, unassignVehicle, units, vectorAdd,
+	setSlingLoad, setVariable, setVehicleAmmo, setVehicleLock, side, Side, sleep, spawn, systemChat, unassignVehicle, units, vectorAdd,
 	vehicle, weaponsTurret, west } from "@paulbarmstrong/js-to-sqf"
-import { AIRCRAFT, getCurrentMod, getDefaultRiflemanForSide, getJetSpotForSide, getMarkerColorForSide, getSpawnPosForSide,
-	getUnitDisplayName, SLINGABLES, TEXTURE_REPLACEMENTS, TROOP_LANDING_AWARD, TROOP_PARACHUTE_AWARD, USE_HITMARKERS } from "../Constants"
+import { AIRCRAFT, getDefaultRiflemanForSide, getJetSpotForSide, getMarkerColorForSide, getSpawnPosForSide,
+	getUnitDisplayName, MOD, SLINGABLES, TEXTURE_REPLACEMENTS, TROOP_LANDING_AWARD, TROOP_PARACHUTE_AWARD, USE_HITMARKERS } from "../Constants"
 import { AircraftConfig } from "../Types"
 import { doneUnloadingTroops, playerAndCrewLocal } from "../Client/PlayerLocal"
-import { slingRopeAttach, updateSlingWaypoint } from "../Client/Sling"
+import { onRopeAttach, onRopeBreak } from "../Client/Sling"
 import { onUnitKilled } from "./EventHandlers"
 import { distributeHitmarker } from "./Hit"
 import { changeMoney } from "./Money"
 import { getTowns } from "./Towns"
-import { addAssistMember, delayedWheelRepair, getOutPunish, keepEngineAlive, trackExplosive, vehicleKilled } from "./Vehicle"
+import { addAssistMember, onVehicleGetOut, onVehicleHit, onWheeledVehicleHit, trackExplosive,
+	vehicleKilled } from "./Vehicle"
 import { updateWaypoint } from "./Waypoint"
+
+/** The "Fired" handler for a slung vehicle: keep it topped up with ammo, and follow any
+ * launcher or cannon round so its impact can be scored. */
+function onSlungVehicleFired(unit: GameObject, weapon: string, muzzle: string, mode: string, ammo: string,
+		magazine: string, projectile: GameObject, shooter: GameObject) {
+	setVehicleAmmo(unit, 1)
+	if (isKindOfV2(weapon, "LauncherCore") || isKindOfV2(weapon, "CannonCore")) {
+		spawn([unit, weapon, muzzle, mode, ammo, magazine, projectile, shooter], trackExplosive)
+	}
+}
 
 function pickSpawnSpot(helipads: Array<GameObject>): GameObject {
 	let spawnSpot = helipads[0]
@@ -35,23 +46,26 @@ function pickSpawnSpot(helipads: Array<GameObject>): GameObject {
 }
 
 function pickAiAircraft(aiSide: Side, money: number): {aircraft: AircraftConfig, armamentIndex: number, price: number} {
-	const candidates = AIRCRAFT.filter(a => a.sides.includes(aiSide) && !a.jet && !a.disallowedForAi
-		&& a.mod === getCurrentMod())
-	let best: {aircraft: AircraftConfig, armamentIndex: number, price: number} | undefined = undefined
+	const candidates = AIRCRAFT.filter(a => a.sides.includes(aiSide) && !(a.jet ?? false) && !(a.disallowedForAi ?? false)
+		&& a.mod === MOD)
+	let hasBest: boolean = false
+	let best: {aircraft: AircraftConfig, armamentIndex: number, price: number} =
+		{aircraft: candidates[0], armamentIndex: 0, price: candidates[0].armaments[0].price + candidates[0].price}
 	candidates.forEach(aircraft => {
 		aircraft.armaments.forEach((armament, armamentIndex) => {
 			const price = aircraft.price + armament.price
-			if (price <= money * 0.75 && (best === undefined || price > best.price)) {
+			if (price <= money * 0.75 && (!hasBest || price > best.price)) {
+				hasBest = true
 				best = {aircraft, armamentIndex, price}
 			}
 		})
 	})
-	return best ?? {aircraft: candidates[0], armamentIndex: 0, price: candidates[0].armaments[0].price + candidates[0].price}
+	return best
 }
 
 export function applyTextureReplacements(heli: GameObject, className: string, heliSide: Side) {
 	TEXTURE_REPLACEMENTS.filter(t => t.className === className && t.side === heliSide).forEach(t => {
-		remoteExec([heli, t.textureIndex, t.texture], setObjectTexture, 0, true)
+		remoteExec([heli, [t.textureIndex, t.texture]], setObjectTexture, 0, true)
 	})
 }
 
@@ -102,7 +116,7 @@ export async function aiRespawn(man: GameObject) {
 	let spawnSpot = pickSpawnSpot(helipads)
 	let special = "FLY"
 	let startHeight = 12
-	if (pick.aircraft.jet) {
+	if (pick.aircraft.jet ?? false) {
 		spawnSpot = getJetSpotForSide(respawnSide)
 		special = "NONE"
 		startHeight = 0
@@ -131,8 +145,8 @@ export async function aiRespawn(man: GameObject) {
 	assignAsDriver(man, heli)
 	moveInDriver(man, heli)
 
-	addEventHandler(heli, "Hit", (v: GameObject) => spawn([v], keepEngineAlive))
-	addEventHandler(heli, "GetOut", (v: GameObject) => spawn([v], getOutPunish))
+	addEventHandler(heli, "Hit", onVehicleHit)
+	addEventHandler(heli, "GetOut", onVehicleGetOut)
 	lock(heli, true)
 	setVehicleLock(heli, "LOCKED")
 
@@ -296,14 +310,14 @@ export async function letTroopsOut(player: GameObject, townIndex: number) {
 
 export async function spawnPlayerAircraft(player: GameObject, heliIndex: number, armamentIndex: number, slingIndex: number) {
 	const playerSide = side(group(player))
-	const aircraft = AIRCRAFT.filter(a => a.sides.includes(playerSide) && a.mod === getCurrentMod())[heliIndex]
+	const aircraft = AIRCRAFT.filter(a => a.sides.includes(playerSide) && a.mod === MOD)[heliIndex]
 	if (aircraft === undefined) return
 	const armament = aircraft.armaments[armamentIndex]
 	if (armament === undefined) return
-	const slingablesList = SLINGABLES.filter(s => s.sides.includes(playerSide) && s.mod === getCurrentMod())
+	const slingablesList = SLINGABLES.filter(s => s.sides.includes(playerSide) && s.mod === MOD)
 
 	const helipads: Array<GameObject> = getVariable(missionNamespace(), playerSide === west() ? "BluforHelipads" : "OpforHelipads")
-	const spawnSpot = aircraft.jet ? getJetSpotForSide(playerSide) : pickSpawnSpot(helipads)
+	const spawnSpot = (aircraft.jet ?? false) ? getJetSpotForSide(playerSide) : pickSpawnSpot(helipads)
 
 	const isSpawningVarName = playerSide === west() ? "BluforIsSpawning" : "OpforIsSpawning"
 	while (getVariable(missionNamespace(), isSpawningVarName)) {
@@ -329,8 +343,8 @@ export async function spawnPlayerAircraft(player: GameObject, heliIndex: number,
 		}
 	})
 
-	addEventHandler(heli, "RopeBreak", (h: GameObject, rope: any, veh: GameObject) => spawn([h, rope, veh], updateSlingWaypoint))
-	addEventHandler(heli, "RopeAttach", (h: GameObject, rope: any, veh: GameObject) => spawn([h, rope, veh], slingRopeAttach))
+	addEventHandler(heli, "RopeBreak", onRopeBreak)
+	addEventHandler(heli, "RopeAttach", onRopeAttach)
 	setVariable(heli, "listOfAssists", [])
 	setVariable(heli, "warfare_owner", group(player))
 	setVariable(heli, "death_has_been_handled", false)
@@ -341,8 +355,8 @@ export async function spawnPlayerAircraft(player: GameObject, heliIndex: number,
 	addEventHandler(heli, "Killed", vehicleKilled)
 	addEventHandler(heli, "Hit", addAssistMember)
 	addEventHandler(heli, "Fired", onHeliFired)
-	addEventHandler(heli, "Hit", (v: GameObject) => spawn([v], keepEngineAlive))
-	addEventHandler(heli, "GetOut", (v: GameObject) => spawn([v], getOutPunish))
+	addEventHandler(heli, "Hit", onVehicleHit)
+	addEventHandler(heli, "GetOut", onVehicleGetOut)
 	setCombatMode(heliGroup, "RED")
 
 	if (armament.manualFire) {
@@ -384,17 +398,11 @@ export async function spawnPlayerAircraft(player: GameObject, heliIndex: number,
 			setVariable(unit, "warfare_owner", group(player))
 			setVariable(unit, "death_has_been_handled", false)
 		})
-		addEventHandler(veh, "Hit", (v: GameObject) => spawn([v], delayedWheelRepair))
-		addEventHandler(veh, "Fired", (unit: GameObject, weapon: string, muzzle: string, mode: string, ammo: string,
-				magazine: string, projectile: GameObject, shooter: GameObject) => {
-			setVehicleAmmo(unit, 1)
-			if (isKindOfV2(weapon, "LauncherCore") || isKindOfV2(weapon, "CannonCore")) {
-				spawn([unit, weapon, muzzle, mode, ammo, magazine, projectile, shooter], trackExplosive)
-			}
-		})
+		addEventHandler(veh, "Hit", onWheeledVehicleHit)
+		addEventHandler(veh, "Fired", onSlungVehicleFired)
 		addEventHandler(veh, "Killed", vehicleKilled)
 		addEventHandler(veh, "Hit", addAssistMember)
-		addEventHandler(veh, "GetOut", (v: GameObject) => spawn([v], getOutPunish))
+		addEventHandler(veh, "GetOut", onVehicleGetOut)
 		setVariable(veh, "listOfAssists", [])
 		setVariable(veh, "warfare_owner", group(player))
 		setVariable(veh, "death_has_been_handled", false)

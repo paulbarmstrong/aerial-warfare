@@ -1,5 +1,5 @@
-import { addEventHandler, alive, allowDamage, assignAsGunner, attachTo, bis, createGroupV2, createMarker, createUnit, createVehicle, deleteVehicle, distance2D, east, GameObject, getDir, getMarkerColor, getMarkerPos, getVariable, globalChat, group, Group, groupChat, grpNull, gunner, hideObject, independent, leader, markerColor, missionNamespace, moveInGunner, nearestObject, nearestObjects, position, PositionAGLS, remoteExec, round, setCombatMode, setDamage, setDir, setMarkerColor, setMarkerText, setMarkerType, setPos, setSkill, setVariable, setVectorDir, setVehicleAmmo, side, Side, sleep, spawn, west } from "@paulbarmstrong/js-to-sqf"
-import { CONTROL_NEARBY_LZ, getCurrentMod, getMarkerColorForSide, getTownFlagClassNameForSide, INCOME_PER_TOWN_TROOP, INITIAL_OCCUPATION, INITIAL_TOWN_TROOPS_DELAY_SECONDS, MINIMUM_INCOME, RIFLEMEN, TOWN_CAPTURE_AWARD, TOWNS_CONFIG, USE_HITMARKERS } from "../Constants";
+import { addEventHandler, alive, allowDamage, assignAsGunner, attachTo, bis, createGroupV2, createMarker, createUnit, createVehicle, deleteVehicle, distance2D, east, GameObject, getDir, getMarkerColor, getMarkerPos, getVariable, globalChat, group, Group, groupChat, grpNull, gunner, hideObject, independent, leader, markerColor, missionNamespace, moveInGunner, nearestObject, nearestObjects, objNull, position, PositionAGLS, remoteExec, round, setCombatMode, setDamage, setDir, setMarkerColor, setMarkerText, setMarkerType, setPos, setSkill, setVariable, setVectorDir, setVehicleAmmo, side, Side, sideUnknown, sleep, spawn, west } from "@paulbarmstrong/js-to-sqf"
+import { CONTROL_NEARBY_LZ, getMarkerColorForSide, getTownFlagClassNameForSide, INCOME_PER_TOWN_TROOP, INITIAL_OCCUPATION, INITIAL_TOWN_TROOPS_DELAY_SECONDS, MINIMUM_INCOME, MOD, RIFLEMEN, TOWN_CAPTURE_AWARD, TOWNS_CONFIG, USE_HITMARKERS } from "../Constants";
 import { Town } from "../Types";
 import { distributeHitmarker } from "./Hit";
 import { changeMoney } from "./Money";
@@ -20,8 +20,11 @@ export function setUpTowns() {
 			const dir: number = getDir(turret)
 			attachTo(turret, turretHolder)
 			setDir(turret, dir)
-			addEventHandler(turret, "GetIn", (turret: GameObject, role: string, man: GameObject) => onGetInTurret(turret, man, townIndex))
-			addEventHandler(turret, "Fired", () => setVehicleAmmo(turret, 0))
+			// An event handler's code is run by the engine long after this loop is gone, so it
+			// can only use what it is handed. The town index has to travel on the turret.
+			setVariable(turret, "townIndex", townIndex)
+			addEventHandler(turret, "GetIn", onTurretGetIn)
+			addEventHandler(turret, "Fired", onTurretFired)
 		})
 
 		const marker = createMarker(`townMarker_${townIndex}`, position(townConfig.flag))
@@ -77,7 +80,7 @@ function putOriginalTownMen() {
 				town.group = newGroup
 				setCombatMode(newGroup, "RED")
 				town.turrets.forEach(turret => {
-					const riflemanClassName = RIFLEMEN.find(r => r.side === side && r.mod === getCurrentMod())!.className
+					const riflemanClassName = RIFLEMEN.find(r => r.side === side && r.mod === MOD)!.className
 					const newUnit: GameObject = createUnit(newGroup, riflemanClassName, position(turret), [], 0, "NONE")
 					addEventHandler(newUnit, "Killed", onUnitKilled)
 					if (USE_HITMARKERS) {
@@ -112,7 +115,7 @@ function putOriginalTownMen() {
 
 				for (let j = 0; j < town.turrets.length && j < maxUnits; j++) {
 					const turret: GameObject = town.turrets[j]
-					const riflemanClassName = RIFLEMEN.find(r => r.side === independent() && r.mod === getCurrentMod())!.className
+					const riflemanClassName = RIFLEMEN.find(r => r.side === independent() && r.mod === MOD)!.className
 					const newUnit: GameObject = createUnit(newGroup, riflemanClassName, position(turret), [], 0, "NONE")
 					setSkill(newUnit, 0.2)
 					addEventHandler(newUnit, "Killed", onUnitKilled)
@@ -129,6 +132,17 @@ function putOriginalTownMen() {
 	setTowns(towns)
 }
 
+// Event handler entry points — see the note in Server/Vehicle.ts. The town index is read
+// back off the turret it was stashed on in setUpTowns.
+
+function onTurretGetIn(turret: GameObject, role: string, man: GameObject) {
+	onGetInTurret(turret, man, getVariable(turret, "townIndex"))
+}
+
+function onTurretFired(turret: GameObject) {
+	setVehicleAmmo(turret, 0)
+}
+
 function onGetInTurret(turret: GameObject, man: GameObject, townIndex: number) {
 	const towns: Array<Town> = getTowns()
 	const town: Town = towns[townIndex]
@@ -137,9 +151,9 @@ function onGetInTurret(turret: GameObject, man: GameObject, townIndex: number) {
 	refreshTown(town, man)
 }
 
-export function refreshTown(town: Town, newUnit: GameObject | undefined) {
-	const townUnits: Array<GameObject> = town.turrets.map(turret => gunner(turret)).filter(unit => unit !== undefined)
-	let townSide: Side | undefined = undefined
+export function refreshTown(town: Town, newUnit: GameObject) {
+	const townUnits: Array<GameObject> = town.turrets.map(turret => gunner(turret)).filter(unit => unit !== objNull())
+	let townSide: Side = sideUnknown()
 	if (townUnits.length > 0) {
 		townSide = side(townUnits[0])
 	}
@@ -159,7 +173,7 @@ export function refreshTown(town: Town, newUnit: GameObject | undefined) {
 			town.group = grpNull()
 		}
 
-		if (newUnit !== undefined) {
+		if (newUnit !== objNull()) {
 			const owner: GameObject = leader(getVariable(newUnit, "warfare_owner"))
 			remoteExec([owner, `Captured ${town.name} | +$${TOWN_CAPTURE_AWARD}`], groupChat, owner, false)
 			changeMoney(owner, TOWN_CAPTURE_AWARD)

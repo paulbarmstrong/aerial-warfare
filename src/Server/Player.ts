@@ -5,12 +5,20 @@ import { distributeHitmarker } from "./Hit"
 import { aiRespawn } from "./Spawn"
 import { deathMessage } from "./Vehicle"
 
+// Event handler entry points — see the note in Server/Vehicle.ts.
+
+function onPlayerUnitRespawn(unit: GameObject) {
+	spawn([unit], aiRespawn)
+}
+
+function onPlayerUnitKilled(unit: GameObject, killer: GameObject) {
+	spawn([unit, killer], onUnitKilled)
+	spawn([unit, killer], deathMessage)
+}
+
 export function setUpPlayer(unit: GameObject) {
-	addEventHandler(unit, "Respawn", (respawnedUnit: GameObject) => spawn([respawnedUnit], aiRespawn))
-	addEventHandler(unit, "Killed", (killedUnit: GameObject, killer: GameObject) => {
-		spawn([killedUnit, killer], onUnitKilled)
-		spawn([killedUnit, killer], deathMessage)
-	})
+	addEventHandler(unit, "Respawn", onPlayerUnitRespawn)
+	addEventHandler(unit, "Killed", onPlayerUnitKilled)
 	if (USE_HITMARKERS) {
 		addEventHandler(unit, "Hit", distributeHitmarker)
 	}

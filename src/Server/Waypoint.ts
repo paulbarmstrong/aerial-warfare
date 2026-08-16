@@ -1,9 +1,26 @@
-import { addWaypoint, bis, deleteWaypoint, distance2D, east, fullCrew, gunner, getVariable, Group, land, leader,
+import { addWaypoint, bis, deleteWaypoint, distance2D, east, fullCrew, GameObject, gunner, getVariable, Group, land, leader,
 	playableUnits, position, setBehaviour, setVariable, setWaypointStatements, setWaypointType, side, spawn, typeOf,
-	vehicle, waypointPosition, waypoints, west } from "@paulbarmstrong/js-to-sqf"
+	vehicle, waypointPosition, waypoints, west,
+	objNull} from "@paulbarmstrong/js-to-sqf"
 import { getSpawnPosForSide } from "../Constants"
 import { aiLandAtBase, aiTroopLanding } from "./Spawn"
 import { getTowns } from "./Towns"
+
+// A waypoint statement is SQF source the engine compiles and runs on its own, so it cannot
+// see anything local to the function that set it up. Each is a named function instead,
+// receiving the waypoint's `this` — the group leader — as its only argument.
+
+function waypointReached(): boolean {
+	return true
+}
+
+function landAtBaseStatement(man: GameObject) {
+	spawn([man], aiLandAtBase)
+}
+
+function troopLandingStatement(man: GameObject) {
+	spawn([man], aiTroopLanding)
+}
 
 export async function updateWaypoint(group: Group) {
 	const man = leader(group)
@@ -11,7 +28,7 @@ export async function updateWaypoint(group: Group) {
 	const groupSide = side(group)
 	const maxTroops = bis.crewCount(typeOf(heli), true) - bis.crewCount(typeOf(heli), false)
 	const isTransportHeli = maxTroops > 0
-	const troopCount = fullCrew(heli).filter(entry => entry[0] !== undefined && getVariable(entry[0], "SoldierType") === "capture").length
+	const troopCount = fullCrew(heli).filter(entry => entry[0] !== objNull() && getVariable(entry[0], "SoldierType") === "capture").length
 
 	const homePos = position(getSpawnPosForSide(groupSide))
 
@@ -24,14 +41,14 @@ export async function updateWaypoint(group: Group) {
 			setVariable(group, "landingAtBase", false)
 			const newWaypoint = addWaypoint(group, homePos, 0)
 			setWaypointType(newWaypoint, "MOVE")
-			setWaypointStatements(newWaypoint, () => true, () => spawn([man], aiLandAtBase))
+			setWaypointStatements(newWaypoint, waypointReached, landAtBaseStatement)
 		} else {
 			const towns = getTowns()
 			let bestIndex = 0
 			let bestFactor = 0
 			towns.forEach((town, i) => {
 				let townFactor = 100 - (distance2D(town.flag, man) / 1000)
-				if (side(town.group) !== groupSide || town.turrets.some(turret => gunner(turret) === undefined)) {
+				if (side(town.group) !== groupSide || town.turrets.some(turret => gunner(turret) === objNull())) {
 					townFactor += 100
 				}
 				if (side(town.group) !== groupSide && town.turrets.length > 0) {
@@ -54,7 +71,7 @@ export async function updateWaypoint(group: Group) {
 			setVariable(group, "lettingOutTroops", false)
 			const newWaypoint = addWaypoint(group, towns[bestIndex].helipad, 0)
 			setWaypointType(newWaypoint, "MOVE")
-			setWaypointStatements(newWaypoint, () => true, () => spawn([man], aiTroopLanding))
+			setWaypointStatements(newWaypoint, waypointReached, troopLandingStatement)
 		}
 	} else {
 		const towns = getTowns()
@@ -83,7 +100,7 @@ export async function updateWaypoint(group: Group) {
 
 		const newWaypoint = addWaypoint(group, homePos, 0)
 		setWaypointType(newWaypoint, "MOVE")
-		setWaypointStatements(newWaypoint, () => true, () => spawn([man], aiLandAtBase))
+		setWaypointStatements(newWaypoint, waypointReached, landAtBaseStatement)
 	}
 
 	setBehaviour(group, "AWARE")

@@ -2,3 +2,4 @@ CfgFunctions.hpp
 sqf
 initPlayerLocal.sqf
 initServer.sqf
+node_modules

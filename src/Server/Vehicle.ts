@@ -1,8 +1,9 @@
 import { alive, allowDamage, assignAsCargo, Config, configFile, deleteVehicle, distance, driver, fullCrew, GameObject,
 	getAllHitPointsDamage, getDammage, getText, getVariable, group, groupChat, groupId, gunner, isKindOfV3, isNull,
 	isObjectHidden, isPlayer, leader, moveInCargo, name, nearestObjects, PositionAGLS, playableUnits, position, remoteExec,
-	setDamage, setFuel, setHitIndex, setMarkerAlpha, setVariable, side, sleep, systemChat, typeOf, unassignVehicle, vehicle,
-	waypoints } from "@paulbarmstrong/js-to-sqf"
+	setDamage, setFuel, setHitIndex, setMarkerAlpha, setVariable, side, sleep, spawn, systemChat, typeOf, unassignVehicle, vehicle,
+	waypoints,
+	objNull} from "@paulbarmstrong/js-to-sqf"
 import { displayHitmarker } from "../Client/Hitmarker"
 import { BIG_BOMB_CLASSNAMES } from "../Constants"
 import { onUnitKilled } from "./EventHandlers"
@@ -43,7 +44,7 @@ export async function delayedWheelRepair(vehicle: GameObject) {
 	if (alive(vehicle)) {
 		thingsToFix.forEach(i => setHitIndex(vehicle, i, 0.6, false))
 
-		if (driver(vehicle) !== undefined && waypoints(group(driver(vehicle))).length > 0) {
+		if (driver(vehicle) !== objNull() && waypoints(group(driver(vehicle))).length > 0) {
 			setFuel(vehicle, 1)
 		}
 	}
@@ -102,10 +103,30 @@ export async function addAssistMember(veh: GameObject, hitter: GameObject) {
 	}
 }
 
+// Event handler entry points. The engine runs a handler from a stack the function that
+// registered it is no longer on, so each of these takes everything it needs from the
+// handler's own arguments and spawns the suspending work in a thread of its own.
+
+export function onVehicleHit(veh: GameObject) {
+	spawn([veh], keepEngineAlive)
+}
+
+export function onWheeledVehicleHit(veh: GameObject) {
+	spawn([veh], delayedWheelRepair)
+}
+
+export function onCrewGotOutMan(unit: GameObject) {
+	spawn([unit], removeAfterMinute)
+}
+
+export function onVehicleGetOut(veh: GameObject, role: string, man: GameObject) {
+	spawn([veh, role, man], getOutPunish)
+}
+
 export async function getOutPunish(veh: GameObject, role: string, man: GameObject) {
 	sleep(0.5)
 
-	if (!isObjectHidden(man) && !isPlayer(man) && vehicle(man) === man && veh !== undefined) {
+	if (!isObjectHidden(man) && !isPlayer(man) && vehicle(man) === man && veh !== objNull()) {
 		const soldierType: string | undefined = getVariable(man, "SoldierType")
 		if (soldierType === "capture") {
 			remoteExec([man], unassignVehicle, veh, false)
@@ -158,7 +179,7 @@ export async function vehicleKilled(veh: GameObject, killer: GameObject) {
 		onUnitKilled(veh, killer)
 	}
 
-	if (driver(veh) !== undefined) {
+	if (driver(veh) !== objNull()) {
 		allowDamage(driver(veh), true)
 		remoteExec([driver(veh), true], allowDamage, driver(veh), false)
 	}

@@ -1,7 +1,25 @@
 import { actionIDs, actionParams, addAction, addWaypoint, deleteWaypoint, distance2D, doWatch, GameObject, getSlingLoad,
 	getVariable, group, isNull, objNull, player, position, removeAction, setBehaviour, setFuel, setSlingLoad, setVariable,
-	setWaypointType, units, waypoints, crew } from "@paulbarmstrong/js-to-sqf"
+	setWaypointType, spawn, units, waypoints, crew } from "@paulbarmstrong/js-to-sqf"
 import { getTowns } from "../Server/Towns"
+
+// Event handler entry points — see the note in Server/Vehicle.ts.
+
+export function onRopeAttach(heli: GameObject, rope: any, veh: GameObject) {
+	spawn([heli, rope, veh], slingRopeAttach)
+}
+
+export function onRopeBreak(heli: GameObject, rope: any, veh: GameObject) {
+	spawn([heli, rope, veh], updateSlingWaypoint)
+}
+
+/** The "Unhook and roll out" action. Its `arguments` are `[veh, heli]`; nothing is read
+ * from the scope that added the action, which by now is gone. */
+function unhookAndRollOut(target: GameObject, caller: GameObject, actionId: number, args: Array<GameObject>) {
+	setVariable(args[0], "roll_out", true)
+	setSlingLoad(args[1], objNull())
+	removeAction(target, actionId)
+}
 
 export async function slingRopeAttach(heli: GameObject, rope: any, veh: GameObject) {
 	let actionExists = false
@@ -12,11 +30,7 @@ export async function slingRopeAttach(heli: GameObject, rope: any, veh: GameObje
 	})
 
 	if (!actionExists) {
-		addAction(player(), "Unhook and roll out", (target, caller, actionId, args: Array<GameObject>) => {
-			setVariable(args[0], "roll_out", true)
-			setSlingLoad(args[1], objNull())
-			removeAction(target, actionId)
-		}, [veh, heli], 8, false)
+		addAction(player(), "Unhook and roll out", unhookAndRollOut, [veh, heli], 8, false)
 	}
 }
 

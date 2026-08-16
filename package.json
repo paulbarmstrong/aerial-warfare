@@ -16,7 +16,10 @@
     "url": "https://github.com/paulbarmstrong/aerial-warfare/issues"
   },
   "homepage": "https://github.com/paulbarmstrong/aerial-warfare#readme",
+  "devDependencies": {
+    "@paulbarmstrong/js-to-sqf-cli": "^0.1.2-alpha"
+  },
   "dependencies": {
-    "@paulbarmstrong/js-to-sqf": "^0.1.0-alpha"
+    "@paulbarmstrong/js-to-sqf": "^0.1.1-alpha"
   }
 }

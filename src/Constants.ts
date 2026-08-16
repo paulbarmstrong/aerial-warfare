@@ -9,8 +9,8 @@ export function getUnitDisplayName(unit: GameObject) {
 	return getText(new Config(configFile(), "CfgVehicles", typeOf(unit), "displayName"))
 }
 
-export function getConvoyVehicles(mod: "RHS" | undefined, side: Side): Array<string> {
-	if (mod === "RHS") {
+export function getConvoyVehicles(side: Side): Array<string> {
+	if (MOD === "RHS") {
 		if (side === west()) {
 			return ["rhsusf_m1025_w_m2", "rhsusf_m1025_w_mk19", "rhsusf_m1025_w_m2"]
 		} else {
@@ -75,20 +75,8 @@ export const INITIAL_TOWN_TROOPS_DELAY_SECONDS = 0.02
 export const INCOME_PER_TOWN_TROOP = bis.getParamValue("TroopIncomeFactor")
 export const USE_HITMARKERS = bis.getParamValue("UseHitmarkers") === 1
 export const USE_RHS = bis.getParamValue("UseRHS") === 1
-function computeMods(): Array<string> {
-	if (USE_RHS) {
-		return ["RHS"]
-	}
-	return []
-}
-export const MODS = computeMods()
+export const MOD = bis.getParamValue("UseRHS") === 1 ? "RHS" : "vanilla"
 
-export function getCurrentMod(): "RHS" | undefined {
-	if (USE_RHS) {
-		return "RHS"
-	}
-	return undefined
-}
 export const INITIAL_OCCUPATION = bis.getParamValue("InitialOccupation")
 export const CONTROL_NEARBY_LZ = bis.getParamValue("ControlNearbyLZ")
 export const STARTING_MONEY = bis.getParamValue("StartingMoney")
@@ -124,7 +112,7 @@ export function getGarageForSide(side: Side): GameObject {
 }
 
 export function getDefaultRiflemanForSide(side: Side): string {
-	return RIFLEMEN.find(r => r.side === side && r.mod === getCurrentMod())!.className
+	return RIFLEMEN.find(r => r.side === side && (r.mod ?? "vanilla") === MOD)!.className
 }
 
 setVariable(missionNamespace(), "SlingMarkerTally", 0)
@@ -132,25 +120,25 @@ setVariable(missionNamespace(), "SlingMarkerArray", [])
 setVariable(missionNamespace(), "SlingVehicleArray", [])
 
 export const RIFLEMEN: Array<RiflemanConfig> = [
-	{side: independent(), className: "I_soldier_F"},
-	{side: west(), className: "B_Soldier_F"},
-	{side: east(), className: "O_Soldier_F"},
+	{side: independent(), mod: "vanilla", className: "I_soldier_F"},
+	{side: west(), mod: "vanilla", className: "B_Soldier_F"},
+	{side: east(), mod: "vanilla", className: "O_Soldier_F"},
 	{side: independent(), mod: "RHS", className: "rhsgref_ins_g_rifleman"},
 	{side: west(), mod: "RHS", className: "rhsusf_usmc_marpat_wd_rifleman_m4"},
 	{side: east(), mod: "RHS", className: "rhs_vdv_flora_rifleman"},
 ]
 
 export const SLINGABLES: Array<SlingableConfig> = [
-	{sides: [west()], className: "B_G_Offroad_01_armed_F", price: 100},
-	{sides: [west()], className: "B_G_Offroad_01_AT_F", price: 250},
-	{sides: [west()], className: "B_LSV_01_AT_F", price: 1000, name: "Prowler (AA)", antiAir: true},
-	{sides: [west()], className: "B_MRAP_01_hmg_F", price: 500},
-	{sides: [west()], className: "B_MRAP_01_gmg_F", price: 500},
-	{sides: [east()], className: "O_G_Offroad_01_armed_F", price: 100},
-	{sides: [east()], className: "O_G_Offroad_01_AT_F", price: 250},
-	{sides: [east()], className: "O_LSV_02_AT_F", price: 1000, name: "Qilin (AA)", antiAir: true},
-	{sides: [east()], className: "O_MRAP_02_hmg_F", price: 500},
-	{sides: [east()], className: "O_MRAP_02_gmg_F", price: 500},
+	{sides: [west()], mod: "vanilla", className: "B_G_Offroad_01_armed_F", price: 100},
+	{sides: [west()], mod: "vanilla", className: "B_G_Offroad_01_AT_F", price: 250},
+	{sides: [west()], mod: "vanilla", className: "B_LSV_01_AT_F", price: 1000, name: "Prowler (AA)", antiAir: true},
+	{sides: [west()], mod: "vanilla", className: "B_MRAP_01_hmg_F", price: 500},
+	{sides: [west()], mod: "vanilla", className: "B_MRAP_01_gmg_F", price: 500},
+	{sides: [east()], mod: "vanilla", className: "O_G_Offroad_01_armed_F", price: 100},
+	{sides: [east()], mod: "vanilla", className: "O_G_Offroad_01_AT_F", price: 250},
+	{sides: [east()], mod: "vanilla", className: "O_LSV_02_AT_F", price: 1000, name: "Qilin (AA)", antiAir: true},
+	{sides: [east()], mod: "vanilla", className: "O_MRAP_02_hmg_F", price: 500},
+	{sides: [east()], mod: "vanilla", className: "O_MRAP_02_gmg_F", price: 500},
 	{sides: [west()], mod: "RHS", className: "rhsusf_m1025_w_m2", price: 500},
 	{sides: [west()], mod: "RHS", className: "rhsusf_m1025_w_mk19", price: 500},
 	{sides: [west()], mod: "RHS", className: "B_T_LSV_01_AT_F", price: 1000, name: "Prowler (AA)", antiAir: true},
@@ -175,6 +163,7 @@ export const AIRCRAFT: Array<AircraftConfig> = [
 		name: "MH-9 Hummingbird",
 		price: 0,
 		sides: [west()],
+		mod: "vanilla",
 		armaments: [
 			{
 				name: "None",
@@ -186,6 +175,7 @@ export const AIRCRAFT: Array<AircraftConfig> = [
 		name: "AH-9 Pawnee",
 		price: 1500,
 		sides: [west()],
+		mod: "vanilla",
 		disallowedForAi: true,
 		armaments: [
 			{
@@ -206,6 +196,7 @@ export const AIRCRAFT: Array<AircraftConfig> = [
 		name: "UH-80 Ghost Hawk",
 		price: 2500,
 		sides: [west(), east()],
+		mod: "vanilla",
 		armaments: [
 			{
 				name: "2x M134 Gunners",
@@ -218,6 +209,7 @@ export const AIRCRAFT: Array<AircraftConfig> = [
 		name: "CH-67 Huron",
 		price: 3000,
 		sides: [west()],
+		mod: "vanilla",
 		disallowedForAi: true,
 		armaments: [
 			{
@@ -236,6 +228,7 @@ export const AIRCRAFT: Array<AircraftConfig> = [
 		name: "V-44 X Blackfish",
 		price: 4000,
 		sides: [west()],
+		mod: "vanilla",
 		armaments: [
 			{
 				name: "None",
@@ -251,6 +244,7 @@ export const AIRCRAFT: Array<AircraftConfig> = [
 		name: "AH-99 Blackfoot",
 		price: 6000,
 		sides: [west()],
+		mod: "vanilla",
 		armaments: [
 			{
 				name: "1x 20mm Gatling Gun",
@@ -267,6 +261,7 @@ export const AIRCRAFT: Array<AircraftConfig> = [
 		name: "A-164 Wipeout",
 		price: 10000,
 		sides: [west()],
+		mod: "vanilla",
 		jet: true,
 		armaments: [
 			{
@@ -285,6 +280,7 @@ export const AIRCRAFT: Array<AircraftConfig> = [
 		name: "MH-6M Little Bird",
 		price: 0,
 		sides: [west()],
+		mod: "vanilla",
 		armaments: [
 			{
 				name: "None",
@@ -477,6 +473,7 @@ export const AIRCRAFT: Array<AircraftConfig> = [
 		name: "PO-30 Orca",
 		price: 0,
 		sides: [east()],
+		mod: "vanilla",
 		disallowedForAi: true,
 		armaments: [
 			{
@@ -508,6 +505,7 @@ export const AIRCRAFT: Array<AircraftConfig> = [
 		name: "Mi-290 Taru",
 		price: 1500,
 		sides: [east()],
+		mod: "vanilla",
 		disallowedForAi: true,
 		armaments: [
 			{
@@ -526,6 +524,7 @@ export const AIRCRAFT: Array<AircraftConfig> = [
 		name: "Mi-48 Kajman",
 		price: 7000,
 		sides: [east()],
+		mod: "vanilla",
 		armaments: [
 			{
 				name: "1x 30mm Gatling Gun",
@@ -544,6 +543,7 @@ export const AIRCRAFT: Array<AircraftConfig> = [
 		name: "Y-32 Xi'an",
 		price: 7000,
 		sides: [east()],
+		mod: "vanilla",
 		jet: true,
 		armaments: [
 			{
@@ -563,6 +563,7 @@ export const AIRCRAFT: Array<AircraftConfig> = [
 		name: "To-199 Neophron",
 		price: 10000,
 		sides: [east()],
+		mod: "vanilla",
 		jet: true,
 		armaments: [
 			{

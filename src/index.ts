@@ -10,6 +10,13 @@ import { setUpPlayer } from "./Server/Player"
 import { aiRespawn } from "./Server/Spawn"
 import { setUpTowns } from "./Server/Towns"
 
+/** A disconnect can strand the per-side spawn lock held by whoever left, which would block
+ * everyone else on that side from spawning. */
+function onPlayerDisconnected() {
+	setVariable(missionNamespace(), "BluforIsSpawning", false, false)
+	setVariable(missionNamespace(), "OpforIsSpawning", false, false)
+}
+
 export default defineMission({
 	initServer: () => {
 		enableSaving(false)
@@ -54,10 +61,7 @@ export default defineMission({
 		// Mission Event Handlers
 		//=========================================
 
-		addMissionEventHandler("PlayerDisconnected", () => {
-			setVariable(missionNamespace(), "BluforIsSpawning", false, false)
-			setVariable(missionNamespace(), "OpforIsSpawning", false, false)
-		})
+		addMissionEventHandler("PlayerDisconnected", onPlayerDisconnected)
 
 		// Plans
 		//=========================================
@@ -77,8 +81,8 @@ export default defineMission({
 		setVariable(uiNamespace(), "aircraftSelection", 0)
 		setVariable(uiNamespace(), "armamentSelection", 0)
 
-		addEventHandler(player(), "Respawn", () => playerRespawn())
-		addEventHandler(player(), "InventoryOpened", () => inventoryOpened())
+		addEventHandler(player(), "Respawn", playerRespawn)
+		addEventHandler(player(), "InventoryOpened", inventoryOpened)
 
 		waitUntil(() => !isNull(findDisplay(46)))
 

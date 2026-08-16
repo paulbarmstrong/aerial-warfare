@@ -2,13 +2,13 @@ import { GameObject, Group, Side } from "@paulbarmstrong/js-to-sqf"
 
 export type RiflemanConfig = {
 	side: Side,
-	mod?: "RHS",
+	mod: "vanilla" | "RHS",
 	className: string,
 }
 
 export type SlingableConfig = {
 	className: string,
-	mod?: "RHS",
+	mod: "vanilla" | "RHS",
 	price: number,
 	sides: Array<Side>,
 	name?: string,
@@ -20,7 +20,7 @@ export type AircraftConfig = {
 	price: number,
 	sides: Array<Side>,
 	jet?: boolean,
-	mod?: "RHS",
+	mod: "vanilla" | "RHS",
 	disallowedForAi?: boolean,
 	armaments: Array<{
 		name: string,

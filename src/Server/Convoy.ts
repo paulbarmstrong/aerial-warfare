@@ -2,11 +2,11 @@ import { addEventHandler, addWaypoint, allowCrewInImmobile, bis, createGroupV2, 
 	distance2D, enableRopeAttach, GameObject, getDir, getVariable, Group, grpNull, leader, limitSpeed, lock, missionNamespace,
 	position, setBehaviour, setFormation, setMarkerAlpha, setMarkerColor, setMarkerType, setVariable, setWaypointType, side,
 	Side, spawn, units, vehicle, waypointPosition, waypoints, west } from "@paulbarmstrong/js-to-sqf"
-import { getConvoyVehicles, getCurrentMod, getGarageForSide, NUM_CONVOYS, USE_HITMARKERS } from "../Constants"
+import { getConvoyVehicles, getGarageForSide, NUM_CONVOYS, USE_HITMARKERS } from "../Constants"
 import { onUnitKilled } from "./EventHandlers"
 import { distributeHitmarker } from "./Hit"
 import { getTowns } from "./Towns"
-import { addAssistMember, delayedWheelRepair, removeAfterMinute } from "./Vehicle"
+import { addAssistMember, onCrewGotOutMan, onWheeledVehicleHit } from "./Vehicle"
 
 export function setUpConvoys() {
 	const bluforGroups: Array<Group> = []
@@ -45,7 +45,7 @@ export function setConvoyGroupsForSide(convoySide: Side, groups: Array<Group>) {
 
 export async function createConvoy(convoySide: Side) {
 	const groups = getConvoyGroupsForSide(convoySide)
-	const vehicleList = getConvoyVehicles(getCurrentMod(), convoySide)
+	const vehicleList = getConvoyVehicles(convoySide)
 	const garage = getGarageForSide(convoySide)
 	let newVehPos = position(garage)
 	const newVehDir = getDir(garage)
@@ -68,13 +68,13 @@ export async function createConvoy(convoySide: Side) {
 		newVehPos = bis.relPos(newVehPos, 20, newVehDir + 180)
 
 		units(group).forEach(member => {
-			addEventHandler(member, "GetOutMan", (crewVeh: GameObject) => spawn([crewVeh], removeAfterMinute))
+			addEventHandler(member, "GetOutMan", onCrewGotOutMan)
 			addEventHandler(member, "Killed", onUnitKilled)
 			if (USE_HITMARKERS) {
 				addEventHandler(member, "Hit", distributeHitmarker)
 			}
 		})
-		addEventHandler(veh, "Hit", (hitVeh: GameObject) => spawn([hitVeh], delayedWheelRepair))
+		addEventHandler(veh, "Hit", onWheeledVehicleHit)
 		addEventHandler(veh, "Killed", onUnitKilled)
 		addEventHandler(veh, "Hit", addAssistMember)
 		setVariable(veh, "listOfAssists", [])

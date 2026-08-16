@@ -2,7 +2,7 @@ import { allowDamage, assignAsCargo, bis, createGroupV2, createUnit, createVehic
 	crew, deleteVehicle, GameObject, getDir, getPosASL, group, hideObjectV2, isPlayer, joinSilent,
 	lock, moveInCargo, moveInDriver, player, position, remoteExec, setDir, setPosASL, setPylonLoadout, setVariable, side,
 	uiNamespace, vectorAdd, vehicle } from "@paulbarmstrong/js-to-sqf"
-import { AIRCRAFT, getCurrentMod, getDefaultRiflemanForSide, getJetSpotForSide, SLINGABLES } from "../Constants"
+import { AIRCRAFT, getDefaultRiflemanForSide, getJetSpotForSide, MOD, SLINGABLES } from "../Constants"
 import { applyTextureReplacements } from "../Server/Spawn"
 import { sortie } from "./Sortie"
 
@@ -21,14 +21,14 @@ export async function doneUnloadingTroops() {
 
 export async function playerAndCrewLocal(spawnSpot: GameObject, heliIndex: number, armaIndex: number, slingIndex: number) {
 	const playerSide = side(group(player()))
-	const aircraft = AIRCRAFT.filter(a => a.sides.includes(playerSide) && a.mod === getCurrentMod())[heliIndex]
+	const aircraft = AIRCRAFT.filter(a => a.sides.includes(playerSide) && a.mod === MOD)[heliIndex]
 	const armament = aircraft.armaments[armaIndex]
-	const slingablesList = SLINGABLES.filter(s => s.sides.includes(playerSide) && s.mod === getCurrentMod())
+	const slingablesList = SLINGABLES.filter(s => s.sides.includes(playerSide) && s.mod === MOD)
 
 	let actualSpawnSpot = spawnSpot
 	let special = "FLY"
 	let startHeight = 12
-	if (aircraft.jet) {
+	if (aircraft.jet ?? false) {
 		actualSpawnSpot = getJetSpotForSide(playerSide)
 		special = "NONE"
 		startHeight = 0

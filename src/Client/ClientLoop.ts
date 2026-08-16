@@ -7,6 +7,12 @@ import { getTowns } from "../Server/Towns"
 import { displayHUDText } from "./Hud"
 import { helipadService } from "./Vehicle"
 
+/** The "Drop troops onto <town>" action. The town index rides along as the action's
+ * `arguments` rather than being captured from the loop that added the action. */
+function dropTroopsAction(target: GameObject, caller: GameObject, actionId: number, townIndex: number) {
+	remoteExec([caller, townIndex], dropTroops, 2, false)
+}
+
 export async function clientLoop() {
 	while (true) {
 		displayHUDText()
@@ -57,9 +63,7 @@ export async function clientLoop() {
 						}
 					})
 					if (!actionExists) {
-						addAction(player(), actionText, (target, caller, actionId, argumentList: number) => {
-							remoteExec([caller, argumentList], dropTroops, 2, false)
-						}, i, 8, true)
+						addAction(player(), actionText, dropTroopsAction, i, 8, true)
 					}
 				} else {
 					actionIDs(player()).forEach(id => {
