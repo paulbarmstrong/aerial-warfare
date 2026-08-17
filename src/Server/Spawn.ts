@@ -269,7 +269,9 @@ async function letOutCargoTroopsAtTown(player: GameObject, townIndex: number, aw
 			remoteExec([[man], true], orderGetIn, player, false)
 
 			remoteExec([man, "B_Parachute"], addBackpack, player, false)
-			remoteExec(["pullNotification"], playSound, player, false)
+			if (isPlayer(player)) {
+				remoteExec(["pullNotification"], playSound, player, false)
+			}
 			remoteExec([player, `${message} | +$${award}`], groupChat, player, false)
 			changeMoney(player, award)
 
