@@ -109,10 +109,7 @@ export async function serverLoop() {
 			})
 		}
 
-		// Handle town-specific turret occupancy on a staggered schedule. Check the unit assigned
-		// to each turret slot (town.units), not who's currently sitting in it - an assigned unit
-		// spends time walking to its turret, and this is what nudges it along / gets it back on
-		// track if it wanders off.
+		// Handle town-specific turret occupancy on a staggered schedule
 		const towns = getTowns()
 		if (towns.length > 0) {
 			const town = towns[count % towns.length]

@@ -240,8 +240,6 @@ async function letOutCargoTroopsAtTown(player: GameObject, townIndex: number, aw
 	let turretSlotIndex = 0
 	let heliManIndex = 0
 	while (heliManIndex < cargoCrew.length && turretSlotIndex < town.turrets.length) {
-		// A slot is reserved as soon as a unit is assigned to it, even before that unit has
-		// walked over and physically gotten in - so check town.units, not who's in the turret.
 		while (turretSlotIndex < town.turrets.length && town.units[turretSlotIndex] !== objNull() && alive(town.units[turretSlotIndex])) {
 			turretSlotIndex += 1
 		}

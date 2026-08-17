@@ -54,9 +54,7 @@ export async function onUnitKilled(unit: GameObject, killer: GameObject) {
 		}
 	}
 
-	// Do things if this guy was guarding a base. Check town.units (who's assigned/reserved to a
-	// turret) rather than who's currently sitting in it - a unit can be killed while still
-	// walking to its turret, before it would ever show up as a gunner.
+	// Do things if this guy was guarding a base
 	const towns = getTowns()
 	towns.forEach(town => {
 		town.units.forEach(assignedUnit => {
