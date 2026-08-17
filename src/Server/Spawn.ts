@@ -1,7 +1,7 @@
-import { action, addBackpack, addEventHandler, addMagazineTurret, addWeaponTurret, allowCrewInImmobile, allowDamage,
+import { action, addBackpack, addEventHandler, addMagazineTurret, addWeaponTurret, alive, allowCrewInImmobile, allowDamage,
 	allTurrets, assignAsCargo, assignAsDriver, assignAsGunner, bis, Config, configFile, createGroupV2, createMarker,
 	createUnit, createVehicleCrew, createVehicleV2, deleteVehicle, diag_log, distance2D, fullCrew, GameObject, getDir,
-	getPosASL, getText, getVariable, globalChat, group, Group, groupChat, grpNull, gunner, hideObjectV2, isKindOfV2, isPlayer,
+	getPosASL, getText, getVariable, globalChat, group, Group, groupChat, grpNull, hideObjectV2, isKindOfV2, isPlayer,
 	isTouchingGround, joinSilent, land, lock, missionNamespace, moveInCargo, moveInDriver, moveOut, name, nearestObjects, objNull, orderGetIn,
 	owner, playableUnits, playSound, position, remoteExec, removeAllActions, removeWeaponTurret, setBehaviour, setCombatMode,
 	setDir, setGroupOwner, setMarkerAlpha, setMarkerColor, setMarkerText, setMarkerType, setObjectTexture, setPosASL,
@@ -15,7 +15,7 @@ import { onRopeAttach, onRopeBreak } from "../Client/Sling"
 import { onUnitKilled } from "./EventHandlers"
 import { distributeHitmarker } from "./Hit"
 import { changeMoney } from "./Money"
-import { getTowns } from "./Towns"
+import { getTowns, setTowns } from "./Towns"
 import { addAssistMember, onVehicleGetOut, onVehicleHit, onWheeledVehicleHit, trackExplosive,
 	vehicleKilled } from "./Vehicle"
 import { updateWaypoint } from "./Waypoint"
@@ -229,6 +229,10 @@ async function letOutCargoTroopsAtTown(player: GameObject, townIndex: number, aw
 	const heli = vehicle(player)
 	const towns = getTowns()
 	const town = towns[townIndex]
+	const playerSide = side(group(player))
+
+	// Can't reinforce a town that's still held by living enemy defenders
+	if (town.group !== grpNull() && side(town.group) !== playerSide) return
 
 	const cargoCrew: Array<GameObject> = fullCrew(heli).map(entry => entry[0])
 		.filter(u => u !== objNull() && (getVariable(u, "SoldierType") ?? "") === "capture")
@@ -236,18 +240,27 @@ async function letOutCargoTroopsAtTown(player: GameObject, townIndex: number, aw
 	let turretSlotIndex = 0
 	let heliManIndex = 0
 	while (heliManIndex < cargoCrew.length && turretSlotIndex < town.turrets.length) {
-		while (turretSlotIndex < town.turrets.length && gunner(town.turrets[turretSlotIndex]) !== objNull()) {
+		// A slot is reserved as soon as a unit is assigned to it, even before that unit has
+		// walked over and physically gotten in - so check town.units, not who's in the turret.
+		while (turretSlotIndex < town.turrets.length && town.units[turretSlotIndex] !== objNull() && alive(town.units[turretSlotIndex])) {
 			turretSlotIndex += 1
 		}
 		if (turretSlotIndex < town.turrets.length) {
 			const man = cargoCrew[heliManIndex]
 			const turret = town.turrets[turretSlotIndex]
 
+			if (town.group === grpNull() || units(town.group).length === 0) {
+				town.group = createGroupV2(playerSide, true)
+				setCombatMode(town.group, "RED")
+			}
+
 			unassignVehicle(man)
 			moveOut(man)
 			joinSilent([man], town.group)
 			assignAsGunner(man, turret)
 			orderGetIn([man], true)
+			town.units[turretSlotIndex] = man
+			setTowns(towns)
 
 			remoteExec([man], unassignVehicle, player, false)
 			remoteExec([man], moveOut, player, false)

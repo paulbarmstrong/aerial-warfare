@@ -1,7 +1,7 @@
-import { alive, Config, configFile, deleteMarker, distance2D, east, GameObject, getPosASL, getPosATL, getText,
-	getVariable, group, groupChat, groupId, gunner, isPlayer, leader, missionNamespace, moveInGunner, name, objNull, orderGetIn,
+import { alive, assignAsGunner, Config, configFile, deleteMarker, distance2D, east, GameObject, getPosASL, getPosATL, getText,
+	getVariable, group, groupChat, groupId, isPlayer, leader, missionNamespace, moveInGunner, name, objNull, orderGetIn,
 	playableUnits, position, remoteExec, setBehaviour, setDamage, setMarkerAlpha, setMarkerPos, setMarkerText,
-	setVariable, side, sleep, spawn, typeOf, units, vehicle, west } from "@paulbarmstrong/js-to-sqf"
+	setVariable, side, sleep, spawn, typeOf, unassignVehicle, units, vehicle, west } from "@paulbarmstrong/js-to-sqf"
 import { getConvoyGroupsForSide, updateConvoyWaypoint } from "./Convoy"
 import { changeMoney, getIncome } from "./Money"
 import { getTowns } from "./Towns"
@@ -109,17 +109,22 @@ export async function serverLoop() {
 			})
 		}
 
-		// Handle town-specific turret occupancy on a staggered schedule
+		// Handle town-specific turret occupancy on a staggered schedule. Check the unit assigned
+		// to each turret slot (town.units), not who's currently sitting in it - an assigned unit
+		// spends time walking to its turret, and this is what nudges it along / gets it back on
+		// track if it wanders off.
 		const towns = getTowns()
 		if (towns.length > 0) {
 			const town = towns[count % towns.length]
-			town.turrets.forEach(turret => {
-				const turretGunner = gunner(turret)
-				if (turretGunner !== objNull() && alive(turretGunner) && vehicle(turretGunner) !== turret) {
-					setDamage(turretGunner, 0)
-					orderGetIn([turretGunner], true)
-					if (distance2D(turretGunner, turret) < 5) {
-						moveInGunner(turretGunner, turret)
+			town.turrets.forEach((turret, j) => {
+				const assignedUnit = town.units[j]
+				if (assignedUnit !== objNull() && alive(assignedUnit) && vehicle(assignedUnit) !== turret) {
+					setDamage(assignedUnit, 0)
+					unassignVehicle(assignedUnit)
+					assignAsGunner(assignedUnit, turret)
+					orderGetIn([assignedUnit], true)
+					if (distance2D(assignedUnit, turret) < 5) {
+						moveInGunner(assignedUnit, turret)
 					}
 					setBehaviour(town.group, "AWARE")
 				}

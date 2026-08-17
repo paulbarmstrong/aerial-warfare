@@ -40,6 +40,11 @@ export type Town = {
     helipad: GameObject;
     turretHolder: GameObject;
     turrets: GameObject[];
+    // The unit assigned/reserved to each turret slot, index-aligned with `turrets`. This is set
+    // as soon as a unit is assigned to a turret, before they've physically walked there and
+    // gotten in - so it is NOT the same as "who is currently sitting in the turret" (use
+    // getTownOccupants/getTownNumAlive for that).
+    units: GameObject[];
     group: Group;
     name: string;
     size: number;

@@ -1,10 +1,10 @@
-import { addWaypoint, bis, deleteWaypoint, distance2D, east, fullCrew, GameObject, gunner, getVariable, Group, land, leader,
+import { addWaypoint, bis, deleteWaypoint, distance2D, east, fullCrew, GameObject, getVariable, Group, land, leader,
 	playableUnits, position, setBehaviour, setVariable, setWaypointStatements, setWaypointType, side, spawn, typeOf,
 	vehicle, waypointPosition, waypoints, west,
 	objNull} from "@paulbarmstrong/js-to-sqf"
 import { getSpawnPosForSide } from "../Constants"
 import { aiLandAtBase, aiTroopLanding } from "./Spawn"
-import { getTowns } from "./Towns"
+import { getTownNumAlive, getTowns } from "./Towns"
 
 // A waypoint statement is SQF source the engine compiles and runs on its own, so it cannot
 // see anything local to the function that set it up. Each is a named function instead,
@@ -48,10 +48,10 @@ export async function updateWaypoint(group: Group) {
 			let bestFactor = 0
 			towns.forEach((town, i) => {
 				let townFactor = 100 - (distance2D(town.flag, man) / 1000)
-				if (side(town.group) !== groupSide || town.turrets.some(turret => gunner(turret) === objNull())) {
+				if (side(town.group) !== groupSide || town.units.some(unit => unit === objNull())) {
 					townFactor += 100
 				}
-				if (side(town.group) !== groupSide && town.turrets.length > 0) {
+				if (side(town.group) !== groupSide && getTownNumAlive(town) > 0) {
 					townFactor -= 20
 				}
 				playableUnits().forEach(unit => {
@@ -79,7 +79,7 @@ export async function updateWaypoint(group: Group) {
 		let bestDistance = 100000
 		towns.forEach((town, i) => {
 			const d = distance2D(town.flag, man)
-			if (d < bestDistance && side(town.group) !== groupSide && town.turrets.length > 0) {
+			if (d < bestDistance && side(town.group) !== groupSide && getTownNumAlive(town) > 0) {
 				bestIndex = i
 				bestDistance = d
 			}
@@ -89,7 +89,7 @@ export async function updateWaypoint(group: Group) {
 			const enemyBasePos = position(getSpawnPosForSide(groupSide === west() ? east() : west()))
 			towns.forEach((town, i) => {
 				const d = distance2D(town.flag, enemyBasePos)
-				if (d < bestDistance && side(town.group) !== groupSide && town.turrets.length > 0) {
+				if (d < bestDistance && side(town.group) !== groupSide && getTownNumAlive(town) > 0) {
 					bestIndex = i
 					bestDistance = d
 				}
