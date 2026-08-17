@@ -1,6 +1,7 @@
 import { actionIDs, actionParams, addAction, addWaypoint, deleteWaypoint, distance2D, doWatch, GameObject, getSlingLoad,
 	getVariable, group, isNull, objNull, player, position, removeAction, setBehaviour, setFuel, setSlingLoad, setVariable,
-	setWaypointType, spawn, units, waypoints, crew } from "@paulbarmstrong/js-to-sqf"
+	setWaypointType, spawn, units, waypoints, crew, 
+	doWatchV2} from "@paulbarmstrong/js-to-sqf"
 import { getTowns } from "../Server/Towns"
 
 // Event handler entry points — see the note in Server/Vehicle.ts.
@@ -65,7 +66,7 @@ export async function updateSlingWaypoint(heli: GameObject, rope: any, veh: Game
 			const moveWaypoint = addWaypoint(grp, towns[bestIndex].flag, 20)
 			setWaypointType(moveWaypoint, "HOLD")
 			setBehaviour(grp, "AWARE")
-			doWatch(units(grp), objNull())
+			doWatchV2(units(grp), objNull())
 		} else {
 			setFuel(veh, 0)
 			doWatch(units(grp), position(towns[bestIndex].flag))

@@ -65,7 +65,7 @@ function pickAiAircraft(aiSide: Side, money: number): {aircraft: AircraftConfig,
 
 export function applyTextureReplacements(heli: GameObject, className: string, heliSide: Side) {
 	TEXTURE_REPLACEMENTS.filter(t => t.className === className && t.side === heliSide).forEach(t => {
-		remoteExec([heli, [t.textureIndex, t.texture]], setObjectTexture, 0, true)
+		remoteExec([heli, t.textureIndex, t.texture], setObjectTexture, 0, true)
 	})
 }
 

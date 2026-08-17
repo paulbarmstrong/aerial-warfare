@@ -282,18 +282,6 @@ export const AIRCRAFT: Array<AircraftConfig> = [
 		name: "MH-6M Little Bird",
 		price: 0,
 		sides: [west()],
-		mod: "vanilla",
-		armaments: [
-			{
-				name: "None",
-				className: "RHS_MELB_MH6M",
-				price: 0,
-			}
-		]
-	}, {
-		name: "MH-6M Little Bird",
-		price: 0,
-		sides: [west()],
 		mod: "RHS",
 		armaments: [
 			{
